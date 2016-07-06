@@ -34,4 +34,34 @@ public class User extends ArrayList<User>
 	{
 		return this.color;
 	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		User user = new User();
+
+		System.out.println("In equals method.");
+
+		if(o == null)
+		{
+			System.out.println("Object is null.");
+			return false;
+		}
+
+		else if(o instanceof User)
+		{
+			System.out.println("Object is an instance of String.");
+			user = (User) o;
+		}
+
+		if(this.name.equals(user.name)) return true;
+
+		else return false;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.name;
+	}
 }
