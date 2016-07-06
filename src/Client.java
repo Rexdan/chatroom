@@ -9,8 +9,6 @@ import	java.net.*;
 public class Client {
 
 	public static int port;
-	
-	
 
 	private static Socket connect( String host ) throws Exception
 	{
