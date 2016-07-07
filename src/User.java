@@ -40,17 +40,17 @@ public class User extends ArrayList<User>
 	{
 		User user = new User();
 
-		System.out.println("In equals method.");
+		//System.out.println("In equals method.");
 
 		if(o == null)
 		{
-			System.out.println("Object is null.");
+			//System.out.println("Object is null.");
 			return false;
 		}
 
 		else if(o instanceof User)
 		{
-			System.out.println("Object is an instance of String.");
+			//System.out.println("Object is an instance of User.");
 			user = (User) o;
 		}
 

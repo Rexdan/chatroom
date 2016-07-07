@@ -5,30 +5,36 @@ import	java.net.*;
 public class Server implements java.io.Serializable
 {
 	private static final long serialVersionUID = 1L;
-	public static ArrayList<String> messages = new ArrayList<String>();
+	public static ArrayList<String> privateMessages = new ArrayList<String>();
 	public static ArrayList<User> users;
 	private static File saveFile;
 
 	public static void main( String [] arg ) throws Exception
 	{
+		deleteAllUsers();
 		ServerSocket	serverSocket = new ServerSocket( 7777, 20 );
 		Socket		socket;
 
 		serverSocket.setReuseAddress( true );
-		//loadUsers();
+		
 		while ( (socket = serverSocket.accept()) != null )
 		{
 			System.out.println( "Accepted an incoming connection" );
 			new SessionThread( socket ).start();
 		}
-		//saveUsers();
 		deleteAllUsers();
 		serverSocket.close();
 	}
 
 	public static void deleteAllUsers()
 	{
+		saveFile = new File("src/users.txt");
 		users = new ArrayList<User>(20);
+		for(int i = 0; i < 20; i++)
+		{
+			users.add(i, new User());
+		}
+		saveUsers();
 	}
 
 	public static void loadUsers(){
@@ -44,7 +50,7 @@ public class Server implements java.io.Serializable
 				    users = new ArrayList<User>(20);
 				    for(int i = 0; i < 20; i++)
 					{
-						Server.users.add(i,new User(""));
+						users.add(i,new User());
 					}
 				    //fis.close();
 				    //ois.close();

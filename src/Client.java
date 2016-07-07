@@ -9,6 +9,13 @@ import	java.net.*;
 public class Client {
 
 	public static int port;
+	
+	private static String UserName;
+	
+	public static String getUserName()
+	{
+		return UserName;
+	}
 
 	private static Socket connect( String host ) throws Exception
 	{
@@ -20,6 +27,11 @@ public class Client {
 		{
 			return null;
 		}
+	}
+	
+	public static void exit()
+	{
+		System.exit(0);
 	}
 
 	public static void main( String [] arg ) throws Exception
@@ -68,7 +80,7 @@ public class Client {
 		String name;
 
 		Scanner sc = new Scanner(System.in);
-		System.out.print("Enter name: ");
+		System.out.print("Enter a username: ");
 		name = sc.nextLine();
 		user = new User(name);
 
@@ -78,7 +90,7 @@ public class Client {
 		 * even check to see if a user exists upon adding one.
 		 */
 		Server.loadUsers();
-		System.out.println("ArrayList size: " + Server.users.size());
+		//System.out.println("ArrayList size: " + Server.users.size());
 
 		if(!Server.users.isEmpty())
 		{
@@ -97,33 +109,43 @@ public class Client {
 					{
 						System.out.println("In for loop for adding user.");
 						Server.users.set(i, user);
+						System.out.println("User that was added: " + Server.users.get(i));
 						Server.saveUsers();
 						break;
 					}
-
 				}
 			}
 		}
-
-		System.out.println("ArrayList size: " + Server.users.size());
-		//System.out.println("First user in Server's UserList is: " + Server.users.get(0).getName());
-
-		for(int i = 0; i < Server.users.size(); i++)
+		
+		int start = 0;
+		
+		while(!Server.users.get(start).getName().equals(""))
 		{
-			System.out.println("User no. " + i + ": " + Server.users.get(i));
+			System.out.println(Server.users.get(start));
+			start++;
 		}
 
 		do {
 			socket = connect( "" /*ipAddr*/);
 		} while ( socket == null );
+		
+		//For reading all keyboard input. Duh.
 		stdIn = new BufferedReader( new InputStreamReader( System.in ) );
+		
+		//We need/want to get information from the Server.
 		fromServer = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
+		
+		//This is a give/take relationship.
 		toServer = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
+		
+		//Want a reference to the username for use in session thread!
+		toServer.println(name);
+		
 		while ( (s = stdIn.readLine()) != null )
 		{
 			toServer.println( s );
 			result = fromServer.readLine();
-			System.out.println( "message: " + result );
+			System.out.println( name + ": " + result );
 		}
 		socket.close();
 	}
