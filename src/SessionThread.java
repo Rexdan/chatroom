@@ -7,6 +7,8 @@ import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 public class SessionThread extends Thread {
 
 	private Socket		socket;
+	
+	private User user;
 
 	private static boolean closed = false;
 
@@ -36,9 +38,46 @@ public class SessionThread extends Thread {
 			
 			//We have a reference to the username!
 			name = fromClient.readLine();
+			user = new User(name);
 			//System.out.println("After reading: " + name);
 			
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
+			
+			Server.loadUsers();
+			//System.out.println("ArrayList size: " + Server.users.size());
+
+			if(!Server.users.isEmpty())
+			{
+				for(int i = 0; i < Server.users.size(); i++)
+				{
+					if(Server.users.get(i) instanceof User)
+					{
+						if(Server.users.get(i).equals(user))
+						{
+							System.out.println("User already exists in chat.");
+							System.out.println("Please restart client with different username.");
+							Server.saveUsers();
+							System.exit(0);
+						}
+						else if(Server.users.get(i).equals(""))
+						{
+							System.out.println("In for loop for adding user.");
+							Server.users.set(i, user);
+							System.out.println("User that was added: " + Server.users.get(i));
+							Server.saveUsers();
+							break;
+						}
+					}
+				}
+			}
+			
+			int start = 0;
+			
+			while(!Server.users.get(start).getName().equals(""))
+			{
+				System.out.println(Server.users.get(start));
+				start++;
+			}
 		
 			while ( (s = fromClient.readLine()) != null )
 			{
@@ -101,15 +140,24 @@ public class SessionThread extends Thread {
 						}
 						else if(command.equalsIgnoreCase("exit"))
 						{
-							buffer = new StringBuffer(command);
+							String message = "You have disconnected.";
+							buffer = new StringBuffer(message);
 							toClient.println(buffer.toString());
-							if(Client.getUserName().equals(name))
+							
+							//Freeing up the username from the list.
+							for(int i = 0; i < Server.users.size(); i++)
 							{
-								System.out.println("blah blah");
-								Client.exit();
+								if(Server.users.get(i).equals(user))
+								{
+									Server.users.set(i, new User());
+									break;
+								}
 							}
 							closed = true;
-							break;
+							System.out.println("Cunt");
+							socket.close();
+							System.out.println("FUCK");
+							return;
 						}
 						else
 						{
@@ -121,7 +169,8 @@ public class SessionThread extends Thread {
 					}
 				}
 				
-				System.out.println(buffer.toString());
+				System.out.println(name + ": " + buffer.toString());
+				
 				toClient.println( buffer.toString() );	
 			}
 			socket.close();

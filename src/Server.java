@@ -6,6 +6,7 @@ public class Server implements java.io.Serializable
 {
 	private static final long serialVersionUID = 1L;
 	public static ArrayList<String> privateMessages = new ArrayList<String>();
+	public static ArrayList<String> messages = new ArrayList<String>();
 	public static ArrayList<User> users;
 	private static File saveFile;
 
@@ -24,6 +25,14 @@ public class Server implements java.io.Serializable
 		}
 		deleteAllUsers();
 		serverSocket.close();
+	}
+	
+	public void printMessages()
+	{
+		//This will get ALL of the messages from the buffer in SessionThread and send them
+		//to the Client class for printing.
+		
+		//Will get called from SessionThread.
 	}
 
 	public static void deleteAllUsers()

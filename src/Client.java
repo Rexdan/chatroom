@@ -10,6 +10,8 @@ public class Client {
 
 	public static int port;
 	
+	public Socket socket;
+	
 	private static String UserName;
 	
 	public static String getUserName()
@@ -89,41 +91,6 @@ public class Client {
 		 * have each index equal to some sort of object before we can
 		 * even check to see if a user exists upon adding one.
 		 */
-		Server.loadUsers();
-		//System.out.println("ArrayList size: " + Server.users.size());
-
-		if(!Server.users.isEmpty())
-		{
-			for(int i = 0; i < Server.users.size(); i++)
-			{
-				if(Server.users.get(i) instanceof User)
-				{
-					if(Server.users.get(i).equals(user))
-					{
-						System.out.println("User already exists in chat.");
-						System.out.println("Please restart client with different username.");
-						Server.saveUsers();
-						System.exit(0);
-					}
-					else if(Server.users.get(i).equals(""))
-					{
-						System.out.println("In for loop for adding user.");
-						Server.users.set(i, user);
-						System.out.println("User that was added: " + Server.users.get(i));
-						Server.saveUsers();
-						break;
-					}
-				}
-			}
-		}
-		
-		int start = 0;
-		
-		while(!Server.users.get(start).getName().equals(""))
-		{
-			System.out.println(Server.users.get(start));
-			start++;
-		}
 
 		do {
 			socket = connect( "" /*ipAddr*/);
@@ -138,11 +105,26 @@ public class Client {
 		//This is a give/take relationship.
 		toServer = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 		
+		if(name.length() > 100)
+		{
+			System.out.println("Username must be at most 100 characters long. Please enter a different username.");
+			System.exit(1);
+		}
+		
 		//Want a reference to the username for use in session thread!
 		toServer.println(name);
 		
-		while ( (s = stdIn.readLine()) != null )
+		/*if(stdIn.readLine().equalsIgnoreCase("@exit"))
 		{
+			toServer.println( stdIn.readLine() );
+			result = fromServer.readLine();
+			System.out.println(result);
+			socket.close();
+			return;
+		}*/
+		
+		while ( (s = stdIn.readLine()) != null )
+		{	
 			toServer.println( s );
 			result = fromServer.readLine();
 			System.out.println( name + ": " + result );
