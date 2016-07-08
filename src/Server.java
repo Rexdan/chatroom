@@ -13,11 +13,11 @@ public class Server implements java.io.Serializable
 	public static void main( String [] arg ) throws Exception
 	{
 		deleteAllUsers();
-		ServerSocket	serverSocket = new ServerSocket( 7777, 20 );
+		ServerSocket	serverSocket = new ServerSocket( 8564, 20 );
 		Socket		socket;
 
 		serverSocket.setReuseAddress( true );
-		
+
 		while ( (socket = serverSocket.accept()) != null )
 		{
 			System.out.println( "Accepted an incoming connection" );
@@ -26,12 +26,12 @@ public class Server implements java.io.Serializable
 		deleteAllUsers();
 		serverSocket.close();
 	}
-	
+
 	public void printMessages()
 	{
 		//This will get ALL of the messages from the buffer in SessionThread and send them
 		//to the Client class for printing.
-		
+
 		//Will get called from SessionThread.
 	}
 
@@ -65,7 +65,6 @@ public class Server implements java.io.Serializable
 				    //ois.close();
 			}
 			else if (line != null){
-				System.out.println("line is NOT null and users exist");
 				FileInputStream fis = new FileInputStream("src/users.txt");
 			    ObjectInputStream ois = new ObjectInputStream(fis);
 			    users = (ArrayList<User>)ois.readObject();

@@ -2,13 +2,19 @@ import java.util.ArrayList;
 
 public class User extends ArrayList<User>
 {
-	public enum Type
-	{
-		PRIVATE, NORMAL;
-	}
-
 	private String name;
 	private String color;
+	private boolean exiting = false;
+
+	public void setExiting(boolean exiting)
+	{
+		this.exiting = exiting;
+	}
+
+	public boolean isExiting()
+	{
+		return exiting;
+	}
 
 	public User()
 	{
