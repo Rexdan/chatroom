@@ -8,9 +8,11 @@ public class Server implements java.io.Serializable
 	public static ArrayList<String> privateMessages = new ArrayList<String>();
 	public static ArrayList<String> messages = new ArrayList<String>();
 	public static ArrayList<User> users;
-	//public static String message = "";
+	public static String message = "";
 	private static File saveFile;
 	private static BufferedReader	fromClient;
+	
+	//May have to subtract one from this variable to display messages correctly
 	private static int count = 0;
 
 	public static void main( String [] arg ) throws Exception
@@ -48,7 +50,8 @@ public class Server implements java.io.Serializable
 
 	public static String getMessage()
 	{
-		return messages.get(count);
+		message = messages.get(count);
+		return message;
 	}
 
 	public static void deleteAllUsers()

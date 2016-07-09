@@ -108,20 +108,6 @@ public class Client {
 		//This is a give/take relationship.
 		toServer = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 
-		/*String name = "";
-
-		Scanner sc = new Scanner(System.in);
-		String command = "";
-
-		name = sc.nextLine();
-		user = new User(name);
-
-		if(name.length() > 100)
-		{
-			System.out.println("Username must be at most 100 characters long. Please enter a different username.");
-			System.exit(1);
-		}*/
-
 		//Want a reference to the username for use in session thread!
 		//toServer.println(name);
 
@@ -129,14 +115,27 @@ public class Client {
 		boolean searching = true;
 		String name = "";
 
-		/*String searching = fromServer.readLine();
-		int count = Integer.parseInt(searching);
-		System.out.println(count);
-		for(int i = 0; i < count; i++)
+		String search = fromServer.readLine();
+		int count = Integer.parseInt(search);
+		
+		String fromSearch = "";
+		
+		if(count > 0)
 		{
-			result = fromServer.readLine();
-			System.out.println(result);
-		}*/
+			fromSearch = fromSearch.concat(("................START OF CHAT HISTORY................" + "\n"));
+			for(int i = 0; i < count; i++)
+			{
+				result = fromServer.readLine();
+				/*if(i == count--)
+				{
+					fromSearch = fromSearch.concat(result);
+					break;
+				}*/
+				fromSearch = fromSearch.concat(result + "\n");
+			}
+			fromSearch = fromSearch.concat("................END OF CHAT HISTORY................");
+			//System.out.println(fromSearch);
+		}
 
 		while ( (s = stdIn.readLine()) != null )
 		{
@@ -160,6 +159,7 @@ public class Client {
 					}
 					System.out.println( result );
 					firstRun = false;
+					if(fromSearch.length() > 0) System.out.println(fromSearch);
 					continue;
 				}
 			}

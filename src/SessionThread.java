@@ -42,6 +42,7 @@ public class SessionThread extends Thread {
 	boolean cameFromNameExists = false;
 	boolean cameFromNameLong = false;
 	boolean cameFromExit = false;
+	boolean searching = true;
 
 	public void run()
 	{
@@ -55,7 +56,18 @@ public class SessionThread extends Thread {
 			Server.loadUsers();
 
 			boolean joined = false;
-			boolean searching = true;
+			
+			toClient.println(Server.messages.size());
+			if(!Server.messages.isEmpty())
+			{
+				System.out.println("................START OF CHAT HISTORY................");
+
+				for(int i = 0; i < Server.messages.size(); i++)
+				{
+					toClient.println(Server.messages.get(i));
+				}
+				System.out.println("................END OF CHAT HISTORY................");
+			}
 
 			while ( (s = fromClient.readLine()) != null )
 			{
@@ -68,7 +80,7 @@ public class SessionThread extends Thread {
 
 				if(c == '@')
 				{
-					//System.out.println("This is the command: " + command);
+					System.out.println("This is the command: " + command);
 					try
 					{
 						/*
@@ -81,6 +93,7 @@ public class SessionThread extends Thread {
 							//We have a reference to the username!
 							//Using substring to get rid of the @name bit.
 							name = command.substring(5);
+							//System.out.println(name);
 							if(name.length() > 100)
 							{
 								cameFromNameLong = true;
@@ -115,14 +128,10 @@ public class SessionThread extends Thread {
 								}
 							}
 						}
-						else if(command.equalsIgnoreCase("private"))
-						{
-							buffer = new StringBuffer("IN YOUR PRIVATES.");
-							System.out.println("IN YOUR PRIVATES.");
-						}
 						else if(command.equalsIgnoreCase("who"))
 						{
-
+							buffer = new StringBuffer("COMMAND: " + command);
+							System.out.println("COMMAND: " + command);
 							String result = "List of Active Users: ";
 
 							boolean first = true;
@@ -162,24 +171,13 @@ public class SessionThread extends Thread {
 							toClient.println(buffer.toString());
 
 						}
+						else if(command.equalsIgnoreCase("private"))
+						{
+							buffer = new StringBuffer("IN YOUR PRIVATES.");
+							System.out.println("IN YOUR PRIVATES.");
+						}
 						else if(command.equalsIgnoreCase("exit"))
 						{
-							/*String message = "You have disconnected.";
-							buffer = new StringBuffer(message);
-							toClient.println(buffer.toString());
-							for(int i = 0; i < Server.users.size(); i++)
-							{
-								if(Server.users.get(i).equals(user))
-								{
-									Server.users.set(i, new User());
-									Server.saveUsers();
-									break;
-								}
-							}
-							closed = true;
-							System.out.println(user + " has disconnected.");
-							socket.close();
-							return;*/
 							cameFromExit = true;
 							exit();
 							socket.close();
@@ -204,23 +202,6 @@ public class SessionThread extends Thread {
 					buffer = new StringBuffer("You have joined the chat session.");
 					toClient.println(buffer.toString());
 					joined = false;
-
-					/*if(!Server.messages.isEmpty())
-					{
-						System.out.println("IN SEARCH");
-
-						toClient.println("................START OF CHAT HISTORY................");
-
-						for(int i = 0; i < Server.messages.size(); i++)
-						{
-							toClient.println(Server.messages.get(i));
-						}
-						toClient.println("................END OF CHAT HISTORY................");
-					}
-					else
-					{
-						toClient.println("NOTEMPTY");
-					}*/
 					continue;
 				}
 
@@ -255,13 +236,11 @@ public class SessionThread extends Thread {
 		if(cameFromNameLong)
 		{
 			message = "cameFromNameLong";
-			//cameFromNameLong = false;
 		}
 		else if(cameFromNameExists)
 		{
 			message = "cameFromNameExists";
 			System.out.println("IN CAMEFROMNAMEEXISTS");
-			//cameFromNameExists = false;
 		}
 		else if(cameFromExit)
 		{
@@ -275,7 +254,6 @@ public class SessionThread extends Thread {
 					break;
 				}
 			}
-			//cameFromExit = false;
 			System.out.println(user + " has disconnected.");
 		}
 
@@ -336,5 +314,4 @@ public class SessionThread extends Thread {
 		user.setColor(resultingColor);
 
 	}
-
 }
