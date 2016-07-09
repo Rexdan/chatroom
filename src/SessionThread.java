@@ -77,6 +77,8 @@ public class SessionThread extends Thread {
 							{
 								cameFromNameLong = true;
 								exit();
+								socket.close();
+								return;
 							}
 							user = new User(name);
 							System.out.println("After being added: " + user);
@@ -91,6 +93,8 @@ public class SessionThread extends Thread {
 											//Server.saveUsers();
 											cameFromNameExists = true;
 											exit();
+											socket.close();
+											return;
 										}
 										else if(Server.users.get(i).equals(""))
 										{
@@ -197,16 +201,6 @@ public class SessionThread extends Thread {
 					joined = false;
 					continue;
 				}
-				if(cameFromNameExists)
-				{
-					socket.close();
-					return;
-				}
-				if(cameFromNameLong)
-				{
-					socket.close();
-					return;
-				}
 				//This is how ANYTHING gets sent to the Server, i.e. CHAT HISTORY.
 				System.out.println(user + ": " + buffer.toString());
 				//This is how ANYTHING gets sent back to the current client.
@@ -229,13 +223,13 @@ public class SessionThread extends Thread {
 		if(cameFromNameLong)
 		{
 			message = "cameFromNameLong";
-			cameFromNameLong = false;
+			//cameFromNameLong = false;
 		}
 		else if(cameFromNameExists)
 		{
 			message = "cameFromNameExists";
 			System.out.println("IN CAMEFROMNAMEEXISTS");
-			cameFromNameExists = false;
+			//cameFromNameExists = false;
 		}
 		else if(cameFromExit)
 		{
@@ -249,7 +243,7 @@ public class SessionThread extends Thread {
 					break;
 				}
 			}
-			cameFromExit = false;
+			//cameFromExit = false;
 			System.out.println(user + " has disconnected.");
 		}
 

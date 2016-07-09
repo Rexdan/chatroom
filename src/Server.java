@@ -29,6 +29,10 @@ public class Server implements java.io.Serializable
 
 	public void printMessages()
 	{
+		/*
+		 * There will be a temporary list of color sequences for the messages here.
+		 */
+		String color1 = "";
 		//This will get ALL of the messages from the buffer in SessionThread and send them
 		//to the Client class for printing.
 

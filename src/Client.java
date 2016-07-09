@@ -136,8 +136,16 @@ public class Client {
 				{
 					toServer.println( s );
 					result = fromServer.readLine();
-					if(result.equals("You have entered a username that exceeds the amount of allowable characters.\n Please restart the Client and try again."))
+					System.out.println("Inside of firstRun: " + result);
+					if(result.equals("cameFromNameExists"))
 					{
+						result = "User already exists in chat. Please restart client with different username.";
+						System.out.println( result );
+						break;
+					}
+					else if(result.equals("cameFromNameExists"))
+					{
+						result = "User already exists in chat. Please restart client with different username.";
 						System.out.println( result );
 						break;
 					}
@@ -148,21 +156,7 @@ public class Client {
 			}
 			toServer.println( s );
 			result = fromServer.readLine();
-			System.out.println("THIS IS THE RESULT: " + result);
-			if(result.equals("cameFromNameLong"))
-			{
-				result = "You have entered a username that exceeds the amount of allowable characters. Please restart the Client and try again.";
-				System.out.println( result );
-				break;
-			}
-			else if(result.equals("cameFromNameExists"))
-			{
-				//System.out.println("BHAHSHJGAJKDHFAJKFHJKAFHJKADGSJFGJHKGDAKJHFGSADHJF");
-				result = "User already exists in chat. Please restart client with different username.";
-				System.out.println( result );
-				break;
-			}
-			else if(result.equals("cameFromExit"))
+			if(result.equals("cameFromExit"))
 			{
 				result = "You have disconnected.";
 				System.out.println( result );
