@@ -4,6 +4,7 @@ public class User extends ArrayList<User>
 {
 	private String name;
 	private String color;
+	private String endingColor = "\033[0m";
 	private boolean exiting = false;
 
 	public void setExiting(boolean exiting)
@@ -68,6 +69,6 @@ public class User extends ArrayList<User>
 	@Override
 	public String toString()
 	{
-		return this.name;
+		return this.color.concat(this.name).concat(this.endingColor);
 	}
 }

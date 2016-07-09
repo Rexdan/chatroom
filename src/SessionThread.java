@@ -81,7 +81,6 @@ public class SessionThread extends Thread {
 								return;
 							}
 							user = new User(name);
-							System.out.println("After being added: " + user);
 							if(!Server.users.isEmpty())
 							{
 								for(int i = 0; i < Server.users.size(); i++)
@@ -98,11 +97,9 @@ public class SessionThread extends Thread {
 										}
 										else if(Server.users.get(i).equals(""))
 										{
+											randomColorSetter();
 											Server.users.set(i, user);
 											Server.saveUsers();
-											//System.out.println(name + " has joined the chat session.");
-											//buffer = new StringBuffer("You have joined the chat session.");
-											//toClient.println(buffer.toString());
 											joined = true;
 											break;
 										}
@@ -252,4 +249,57 @@ public class SessionThread extends Thread {
 		toClient.println(buffer.toString());
 		closed = true;
 	}
+
+	public void randomColorSetter()
+	{
+		/*
+		 * There will be a temporary list of color sequences for the messages here.
+		 */
+
+		String resultingColor = "";
+
+		Random rn = new Random();
+
+		String firstPart = "\033[";
+
+		resultingColor = resultingColor.concat(firstPart);
+
+		//0,1,2,3,4,7,8
+		String secondPart = "";
+
+		int toSwitch = 1 + rn.nextInt(2 - 1 + 1);
+
+		if(toSwitch == 1)
+		{
+			int forSecondPart1 = 0 + rn.nextInt(4 - 0 + 1);
+			secondPart = secondPart.concat(Integer.toString(forSecondPart1));
+			secondPart = secondPart.concat(";");
+			resultingColor = resultingColor.concat(secondPart);
+		}
+		else if(toSwitch == 2)
+		{
+			int forSecondPart2 = 7 + rn.nextInt(8 - 7 + 1);
+			secondPart = secondPart.concat(Integer.toString(forSecondPart2));
+			secondPart = secondPart.concat(";");
+			resultingColor = resultingColor.concat(secondPart);
+		}
+
+		//from 30 to 37
+		String thirdPart = "";
+		int forThirdPart = 30 + rn.nextInt(37 - 30 + 1);
+		thirdPart = thirdPart.concat(Integer.toString(forThirdPart));
+		thirdPart = thirdPart.concat(";");
+		resultingColor = resultingColor.concat(thirdPart);
+
+		//40 to 47
+		String fourthPart = "";
+		int forFourthPart = 40 + rn.nextInt(47 - 40 + 1);
+		fourthPart = fourthPart.concat(Integer.toString(forFourthPart));
+		fourthPart = fourthPart.concat("m");
+		resultingColor = resultingColor.concat(fourthPart);
+
+		user.setColor(resultingColor);
+
+	}
+
 }
