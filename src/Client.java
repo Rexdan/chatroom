@@ -126,7 +126,17 @@ public class Client {
 		//toServer.println(name);
 
 		boolean firstRun = true;
+		boolean searching = true;
 		String name = "";
+
+		/*String searching = fromServer.readLine();
+		int count = Integer.parseInt(searching);
+		System.out.println(count);
+		for(int i = 0; i < count; i++)
+		{
+			result = fromServer.readLine();
+			System.out.println(result);
+		}*/
 
 		while ( (s = stdIn.readLine()) != null )
 		{
@@ -136,7 +146,6 @@ public class Client {
 				{
 					toServer.println( s );
 					result = fromServer.readLine();
-					System.out.println("Inside of firstRun: " + result);
 					if(result.equals("cameFromNameExists"))
 					{
 						result = "User already exists in chat. Please restart client with different username.";
@@ -154,6 +163,7 @@ public class Client {
 					continue;
 				}
 			}
+
 			toServer.println( s );
 			result = fromServer.readLine();
 			if(result.equals("cameFromExit"))

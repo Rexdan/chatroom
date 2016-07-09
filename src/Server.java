@@ -8,7 +8,10 @@ public class Server implements java.io.Serializable
 	public static ArrayList<String> privateMessages = new ArrayList<String>();
 	public static ArrayList<String> messages = new ArrayList<String>();
 	public static ArrayList<User> users;
+	//public static String message = "";
 	private static File saveFile;
+	private static BufferedReader	fromClient;
+	private static int count = 0;
 
 	public static void main( String [] arg ) throws Exception
 	{
@@ -22,17 +25,30 @@ public class Server implements java.io.Serializable
 		{
 			System.out.println( "Accepted an incoming connection" );
 			new SessionThread( socket ).start();
+
 		}
 		deleteAllUsers();
 		serverSocket.close();
 	}
 
-	public void printMessages()
+	public static void incrCounter()
 	{
-		//This will get ALL of the messages from the buffer in SessionThread and send them
-		//to the Client class for printing.
+		count++;
+	}
 
-		//Will get called from SessionThread.
+	public static int getCount()
+	{
+		return count;
+	}
+
+	public static void saveMessage(String message) throws IOException
+	{
+		messages.add(message);
+	}
+
+	public static String getMessage()
+	{
+		return messages.get(count);
 	}
 
 	public static void deleteAllUsers()

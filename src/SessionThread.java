@@ -17,6 +17,8 @@ public class SessionThread extends Thread {
 
 	public ArrayList<String> privateMessages = new ArrayList<String>();
 
+	private String message;
+
 	public SessionThread( Socket s )
 	{
 		socket = s;
@@ -25,6 +27,11 @@ public class SessionThread extends Thread {
 	public static boolean isClosed()
 	{
 		return closed;
+	}
+
+	public String getMessage()
+	{
+		return this.message;
 	}
 
 	BufferedReader	fromClient;
@@ -48,6 +55,7 @@ public class SessionThread extends Thread {
 			Server.loadUsers();
 
 			boolean joined = false;
+			boolean searching = true;
 
 			while ( (s = fromClient.readLine()) != null )
 			{
@@ -196,12 +204,39 @@ public class SessionThread extends Thread {
 					buffer = new StringBuffer("You have joined the chat session.");
 					toClient.println(buffer.toString());
 					joined = false;
+
+					/*if(!Server.messages.isEmpty())
+					{
+						System.out.println("IN SEARCH");
+
+						toClient.println("................START OF CHAT HISTORY................");
+
+						for(int i = 0; i < Server.messages.size(); i++)
+						{
+							toClient.println(Server.messages.get(i));
+						}
+						toClient.println("................END OF CHAT HISTORY................");
+					}
+					else
+					{
+						toClient.println("NOTEMPTY");
+					}*/
 					continue;
 				}
+
 				//This is how ANYTHING gets sent to the Server, i.e. CHAT HISTORY.
-				System.out.println(user + ": " + buffer.toString());
+
+				//System.out.println(user + ": " + buffer.toString());
+
+				message = user.toString();
+				message = message.concat(": ").concat(buffer.toString());
+
+				Server.saveMessage(message);
+
 				//This is how ANYTHING gets sent back to the current client.
-				toClient.println( user + ": "+ buffer.toString() );
+				toClient.println( Server.getMessage() );
+				Server.incrCounter();
+				System.out.println("Current Count: " + Server.getCount());
 			}
 			socket.close();
 		}
@@ -253,7 +288,7 @@ public class SessionThread extends Thread {
 	public void randomColorSetter()
 	{
 		/*
-		 * There will be a temporary list of color sequences for the messages here.
+		 * This is for giving the username a color and it does it randomly.
 		 */
 
 		String resultingColor = "";
