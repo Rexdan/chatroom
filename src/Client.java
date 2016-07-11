@@ -112,13 +112,16 @@ public class Client {
 
 		boolean firstRun = true;
 		String name = "";
-
+		
 		String search = "";
 		int count = 0;
 		search = fromServer.readLine();
 		count = Integer.parseInt(search);
 		String fromSearch = "";
 		
+		/*
+		 * For printing out the chat history after the Client process starts.
+		 */
 		if(count > 0)
 		{
 			fromSearch = fromSearch.concat(("................START OF CHAT HISTORY................" + "\n"));
@@ -129,32 +132,50 @@ public class Client {
 			}
 			fromSearch = fromSearch.concat("................END OF CHAT HISTORY................");
 		}
-
+		
+		boolean success = false;
+		
 		while ( (s = stdIn.readLine()) != null )
 		{
-			if(firstRun)
+			try
 			{
-				if(s.substring(0,5).equalsIgnoreCase("@name"))
+				if(firstRun)
 				{
-					toServer.println( s );
-					result = fromServer.readLine();
-					if(result.equals("cameFromNameExists"))
+					if(s.equalsIgnoreCase("@name"))
 					{
-						result = "User already exists in chat. Please restart client with different username.";
-						System.out.println( result );
+						toServer.println( s );
+						String toPrint = "ERROR. You cannot have an empty username.";
+						toPrint = toPrint.concat("\n");
+						toPrint = toPrint.concat("Please restart the client.");
+						System.out.println(toPrint);
 						break;
 					}
-					else if(result.equals("cameFromNameExists"))
+					else if(s.substring(0,6).equalsIgnoreCase("@name "))
 					{
-						result = "User already exists in chat. Please restart client with different username.";
+						toServer.println( s );
+						result = fromServer.readLine();
+						if(result.equals("cameFromNameExists"))
+						{
+							result = "User already exists in chat. Please restart client with different username.";
+							System.out.println( result );
+							break;
+						}
+						else if(result.equals("cameFromNameExists"))
+						{
+							result = "User already exists in chat. Please restart client with different username.";
+							System.out.println( result );
+							break;
+						}
+						
 						System.out.println( result );
-						break;
+						firstRun = false;
+						if(fromSearch.length() > 0) System.out.println(fromSearch);
+						continue;
 					}
-					System.out.println( result );
-					firstRun = false;
-					if(fromSearch.length() > 0) System.out.println(fromSearch);
-					continue;
 				}
+			}catch(Exception e)
+			{
+				
 			}
 
 			toServer.println( s );
@@ -163,6 +184,14 @@ public class Client {
 			{
 				result = "You have disconnected.";
 				System.out.println( result );
+				break;
+			}
+			else if(result.equals("bad run"))
+			{
+				String toPrint = "ERROR. You must specify a username with the @name command.";
+				toPrint = toPrint.concat("\n");
+				toPrint = toPrint.concat("Please restart the client.");
+				System.out.println(toPrint);
 				break;
 			}
 			System.out.println( result );

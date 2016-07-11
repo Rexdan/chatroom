@@ -56,6 +56,7 @@ public class SessionThread extends Thread {
 			//Server.loadUsers();
 
 			boolean joined = false;
+			boolean firstRun = true;
 			
 			toClient.println(Server.messages.size());
 			if(!Server.messages.isEmpty())
@@ -71,70 +72,34 @@ public class SessionThread extends Thread {
 				buffer = new StringBuffer( s );
 
 				String command = buffer.toString();
-				
-				//if(command.equalsIgnoreCase("@who")) System.out.println("IN WHOOOOOOO");
 
 				char c = command.charAt(0);
 				command = command.substring(1);
 				
+				boolean badCommand = true;
+				
 				System.out.println("Command right before try: " + command);
+				
+				if(joined == false && firstRun)
+				{
+					/*
+					 * If the very first read isn't an @ command, we quit.
+					 */
+					char blah = s.charAt(0);
+					if(blah != '@')
+					{
+						buffer = new StringBuffer("bad run");
+						toClient.println(buffer.toString());
+						socket.close();
+						return;
+					}
+					else firstRun = false;
+				}
 
 				if(c == '@')
 				{
 					System.out.println("This is the command: " + command);
 					
-					/*
-					 * If a user exists, then these commands can be carried out.
-					 */
-					if(user != null)
-					{
-						if(command.equalsIgnoreCase("who"))
-						{
-							//buffer = new StringBuffer("COMMAND: " + command);
-							//System.out.println("COMMAND: " + command);
-							String result = "List of Active Users: ";
-
-							boolean first = true;
-							boolean singleUser = true;
-
-							for(int i = 0; i < Server.users.size(); i++)
-							{
-								if(!Server.users.get(i).getName().equals(""))
-								{
-									if(first == true)
-									{
-										result = result.concat(Server.users.get(i).getName());
-										first = false;
-									}
-									else
-									{
-										result = result.concat(", " + Server.users.get(i).getName());
-										singleUser = false;
-									}
-								}
-							}
-							if(singleUser = false)
-							{
-								result = result.substring(0, result.length() - 2);
-								result = result.concat(".");
-							}
-							else
-							{
-								result = result.concat(".");
-							}
-
-							buffer = new StringBuffer(result);
-							toClient.println(buffer.toString());
-							continue;
-						}
-						else if(command.equalsIgnoreCase("exit"))
-						{
-							cameFromExit = true;
-							exit();
-							socket.close();
-							return;
-						}
-					}
 					try
 					{
 						/*
@@ -143,7 +108,12 @@ public class SessionThread extends Thread {
 						 * being null afterwards. Also double checking to see if a user
 						 * is trying to use the command again via the user == null condition.
 						 */
-						if(command.substring(0, 4).equalsIgnoreCase("name") && user == null)
+						if(command.equalsIgnoreCase("name"))
+						{
+							socket.close();
+							return;
+						}
+						else if(command.substring(0, 5).equalsIgnoreCase("name ") && user == null)
 						{
 							//We have a reference to the username!
 							//Using substring to get rid of the @name bit.
@@ -180,6 +150,7 @@ public class SessionThread extends Thread {
 											System.out.println(name + " has joined the chat session.");
 											buffer = new StringBuffer("You have joined the chat session.");
 											toClient.println(buffer.toString());
+											badCommand = false;
 											break;
 										}
 									}
@@ -191,18 +162,110 @@ public class SessionThread extends Thread {
 								}
 							}
 						}
-						else if(command.substring(0,7).equalsIgnoreCase("private"))
-						{
-							buffer = new StringBuffer("IN YOUR PRIVATES.");
-							System.out.println("IN YOUR PRIVATES.");
-						}
-						else
-						{
-							System.out.println("ERROR. This is not a command.");
-						}
 					} catch (Exception e)
 					{
 
+					}
+					
+					/*
+					 * If a user exists, then these commands can be carried out.
+					 */
+					if(user != null)
+					{
+						try
+						{
+							/*
+							 * Case where user simply types "@private"
+							 */
+							if(command.equalsIgnoreCase("private"))
+							{
+								buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
+								toClient.println(buffer.toString());
+								continue;
+							}
+							/*
+							 * Case where user types "@private " where the space can be either empty
+							 * or with a username.
+							 */
+							else if(command.substring(0,8).equalsIgnoreCase("private "))
+							{
+								String otherUser = "";
+								otherUser = otherUser.concat(command.substring(8));
+								if(otherUser.length() == 0)
+								{
+									buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
+									toClient.println(buffer.toString());
+									continue;
+								}
+								
+								/*
+								 * HANDLE FOR WHEN THE USER DOES WANT TO INTERACT WITH A SEPARATE USER.
+								 * MAY NEED SYNCRHONIZATION.
+								 */
+								
+								System.out.println("JKHJKSDHFJKHSDFKJKJF");
+								buffer = new StringBuffer("JKHJKSDHFJKHSDFKJKJF");
+								toClient.println(buffer.toString());
+								badCommand = false;
+								continue;
+							}
+						}catch(Exception e)
+						{
+							
+						}finally
+						{
+							if(command.equalsIgnoreCase("who"))
+							{
+								String result = "List of Active Users: ";
+
+								boolean first = true;
+								boolean singleUser = true;
+						
+								for(int i = 0; i < Server.users.size(); i++)
+								{
+									if(!Server.users.get(i).getName().equals(""))
+									{
+										if(first == true)
+										{
+											result = result.concat(Server.users.get(i).getName());
+											first = false;
+										}
+										else
+										{
+											result = result.concat(", " + Server.users.get(i).getName());
+											singleUser = false;
+										}
+									}
+								}
+								if(singleUser = false)
+								{
+									result = result.substring(0, result.length() - 2);
+									result = result.concat(".");
+								}
+								else
+								{
+									result = result.concat(".");
+								}
+								buffer = new StringBuffer(result);
+								toClient.println(buffer.toString());
+								badCommand = false;
+								continue;
+							}
+							else if(command.equalsIgnoreCase("exit"))
+							{
+								cameFromExit = true;
+								exit();
+								socket.close();
+								badCommand = false;
+								return;
+							}
+						}
+					}
+					if(badCommand)
+					{
+						toClient.println("ERROR. This is not a command.");
+						System.out.println("ERROR. This is not a command.");
+						continue;
 					}
 				}
 
@@ -214,7 +277,7 @@ public class SessionThread extends Thread {
 				//This is how ANYTHING gets sent back to the current client.
 				toClient.println( Server.getMessage() );
 				Server.incrCounter();
-				System.out.println("Current Count: " + Server.getCount());
+				//System.out.println("Current Count: " + Server.getCount());
 			}
 			socket.close();
 		}
@@ -237,7 +300,6 @@ public class SessionThread extends Thread {
 		else if(cameFromNameExists)
 		{
 			message = "cameFromNameExists";
-			System.out.println("IN CAMEFROMNAMEEXISTS");
 		}
 		else if(cameFromExit)
 		{
@@ -251,11 +313,12 @@ public class SessionThread extends Thread {
 					break;
 				}
 			}
+			//CHANGE TO PRINT INTO CHAT HISTORY.
 			System.out.println(user + " has disconnected.");
 		}
 
 		buffer = new StringBuffer(message);
-		System.out.println("RIGHT BEFORE BUFFER: " + buffer.toString());
+		//System.out.println("RIGHT BEFORE BUFFER: " + buffer.toString());
 		toClient.println(buffer.toString());
 		closed = true;
 	}
