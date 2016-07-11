@@ -19,7 +19,6 @@ public class Client {
 		return UserName;
 	}
 
-
 	private static Socket connect( String host ) throws Exception
 	{
 		try
@@ -112,12 +111,12 @@ public class Client {
 		//toServer.println(name);
 
 		boolean firstRun = true;
-		boolean searching = true;
 		String name = "";
 
-		String search = fromServer.readLine();
-		int count = Integer.parseInt(search);
-		
+		String search = "";
+		int count = 0;
+		search = fromServer.readLine();
+		count = Integer.parseInt(search);
 		String fromSearch = "";
 		
 		if(count > 0)
@@ -126,15 +125,9 @@ public class Client {
 			for(int i = 0; i < count; i++)
 			{
 				result = fromServer.readLine();
-				/*if(i == count--)
-				{
-					fromSearch = fromSearch.concat(result);
-					break;
-				}*/
 				fromSearch = fromSearch.concat(result + "\n");
 			}
 			fromSearch = fromSearch.concat("................END OF CHAT HISTORY................");
-			//System.out.println(fromSearch);
 		}
 
 		while ( (s = stdIn.readLine()) != null )

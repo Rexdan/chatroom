@@ -10,14 +10,14 @@ public class Server implements java.io.Serializable
 	public static ArrayList<User> users;
 	public static String message = "";
 	private static File saveFile;
-	private static BufferedReader	fromClient;
 	
 	//May have to subtract one from this variable to display messages correctly
 	private static int count = 0;
 
 	public static void main( String [] arg ) throws Exception
 	{
-		deleteAllUsers();
+		//After Server loads, we want to delete any previous users.
+		resetAllUsers();
 		ServerSocket	serverSocket = new ServerSocket( 8564, 20 );
 		Socket		socket;
 
@@ -29,7 +29,8 @@ public class Server implements java.io.Serializable
 			new SessionThread( socket ).start();
 
 		}
-		deleteAllUsers();
+		//After Server shuts down, we want to delete all of the users.
+		resetAllUsers();
 		serverSocket.close();
 	}
 
@@ -54,7 +55,7 @@ public class Server implements java.io.Serializable
 		return message;
 	}
 
-	public static void deleteAllUsers()
+	public static void resetAllUsers()
 	{
 		saveFile = new File("src/users.txt");
 		users = new ArrayList<User>(20);

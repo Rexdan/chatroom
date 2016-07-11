@@ -46,49 +46,104 @@ public class SessionThread extends Thread {
 
 	public void run()
 	{
-		Server.loadUsers();
+		//Server.loadUsers();
 
 		try {
 			fromClient = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 
-			Server.loadUsers();
+			//Server.loadUsers();
 
 			boolean joined = false;
 			
 			toClient.println(Server.messages.size());
 			if(!Server.messages.isEmpty())
 			{
-				System.out.println("................START OF CHAT HISTORY................");
-
 				for(int i = 0; i < Server.messages.size(); i++)
 				{
 					toClient.println(Server.messages.get(i));
 				}
-				System.out.println("................END OF CHAT HISTORY................");
 			}
-
+			
 			while ( (s = fromClient.readLine()) != null )
 			{
 				buffer = new StringBuffer( s );
 
 				String command = buffer.toString();
+				
+				//if(command.equalsIgnoreCase("@who")) System.out.println("IN WHOOOOOOO");
 
 				char c = command.charAt(0);
 				command = command.substring(1);
+				
+				System.out.println("Command right before try: " + command);
 
 				if(c == '@')
 				{
 					System.out.println("This is the command: " + command);
+					
+					/*
+					 * If a user exists, then these commands can be carried out.
+					 */
+					if(user != null)
+					{
+						if(command.equalsIgnoreCase("who"))
+						{
+							//buffer = new StringBuffer("COMMAND: " + command);
+							//System.out.println("COMMAND: " + command);
+							String result = "List of Active Users: ";
+
+							boolean first = true;
+							boolean singleUser = true;
+
+							for(int i = 0; i < Server.users.size(); i++)
+							{
+								if(!Server.users.get(i).getName().equals(""))
+								{
+									if(first == true)
+									{
+										result = result.concat(Server.users.get(i).getName());
+										first = false;
+									}
+									else
+									{
+										result = result.concat(", " + Server.users.get(i).getName());
+										singleUser = false;
+									}
+								}
+							}
+							if(singleUser = false)
+							{
+								result = result.substring(0, result.length() - 2);
+								result = result.concat(".");
+							}
+							else
+							{
+								result = result.concat(".");
+							}
+
+							buffer = new StringBuffer(result);
+							toClient.println(buffer.toString());
+							continue;
+						}
+						else if(command.equalsIgnoreCase("exit"))
+						{
+							cameFromExit = true;
+							exit();
+							socket.close();
+							return;
+						}
+					}
 					try
 					{
 						/*
 						 * This will always be the first thing to run when a client
 						 * process starts. So, no need to worry about the user object
-						 * being null afterwards.
+						 * being null afterwards. Also double checking to see if a user
+						 * is trying to use the command again via the user == null condition.
 						 */
-						if(command.substring(0, 4).equalsIgnoreCase("name"))
+						if(command.substring(0, 4).equalsIgnoreCase("name") && user == null)
 						{
 							//We have a reference to the username!
 							//Using substring to get rid of the @name bit.
@@ -120,68 +175,26 @@ public class SessionThread extends Thread {
 										{
 											randomColorSetter();
 											Server.users.set(i, user);
-											Server.saveUsers();
+											//Server.saveUsers();
 											joined = true;
+											System.out.println(name + " has joined the chat session.");
+											buffer = new StringBuffer("You have joined the chat session.");
+											toClient.println(buffer.toString());
 											break;
 										}
 									}
 								}
-							}
-						}
-						else if(command.equalsIgnoreCase("who"))
-						{
-							buffer = new StringBuffer("COMMAND: " + command);
-							System.out.println("COMMAND: " + command);
-							String result = "List of Active Users: ";
-
-							boolean first = true;
-							boolean singleUser = true;
-
-							for(int i = 0; i < Server.users.size(); i++)
-							{
-								if(!Server.users.get(i).getName().equals(""))
+								if(joined)
 								{
-									if(first == true)
-									{
-										result = result.concat(Server.users.get(i).getName());
-										first = false;
-									}
-									else
-									{
-										result = result.concat(", " + Server.users.get(i).getName());
-										singleUser = false;
-									}
+									joined = false;
+									continue;
 								}
 							}
-
-							/* If there is more than one user, we append a period at the end.
-							 * This is purely for formatting.
-							 */
-							if(singleUser = false)
-							{
-								result = result.substring(0, result.length() - 2);
-								result = result.concat(".");
-							}
-							else
-							{
-								result = result.concat(".");
-							}
-
-							buffer = new StringBuffer(result);
-							toClient.println(buffer.toString());
-
 						}
-						else if(command.equalsIgnoreCase("private"))
+						else if(command.substring(0,7).equalsIgnoreCase("private"))
 						{
 							buffer = new StringBuffer("IN YOUR PRIVATES.");
 							System.out.println("IN YOUR PRIVATES.");
-						}
-						else if(command.equalsIgnoreCase("exit"))
-						{
-							cameFromExit = true;
-							exit();
-							socket.close();
-							return;
 						}
 						else
 						{
@@ -192,22 +205,6 @@ public class SessionThread extends Thread {
 
 					}
 				}
-				/*
-				 * This is for allowing the client and server to communicate
-				 * NSYNC (Backstreet Boys are better). Needed a boolean to allow for switching.
-				 */
-				if(joined)
-				{
-					System.out.println(name + " has joined the chat session.");
-					buffer = new StringBuffer("You have joined the chat session.");
-					toClient.println(buffer.toString());
-					joined = false;
-					continue;
-				}
-
-				//This is how ANYTHING gets sent to the Server, i.e. CHAT HISTORY.
-
-				//System.out.println(user + ": " + buffer.toString());
 
 				message = user.toString();
 				message = message.concat(": ").concat(buffer.toString());
@@ -250,7 +247,7 @@ public class SessionThread extends Thread {
 				if(Server.users.get(i).equals(user))
 				{
 					Server.users.set(i, new User());
-					Server.saveUsers();
+					//Server.saveUsers();
 					break;
 				}
 			}
