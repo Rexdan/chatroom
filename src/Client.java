@@ -3,16 +3,22 @@ import java.util.jar.Attributes.Name;
 
 import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
 
+import com.sun.glass.ui.TouchInputSupport;
+
+import sun.security.util.Length;
+
 import	java.io.*;
 import	java.net.*;
 
-public class Client {
+public class Client implements Runnable{
 
 	public static int port;
 
 	public Socket socket;
 
 	private static String UserName;
+	
+	public ArrayList<Socket> sockets = new ArrayList<Socket>();
 
 	public static String getUserName()
 	{
@@ -30,21 +36,16 @@ public class Client {
 			return null;
 		}
 	}
-
-	public static void exit()
-	{
-		System.exit(0);
-	}
-
+	
+	static String s, result;
+	static BufferedReader stdIn, fromServer;
+	static PrintWriter	toServer;
+	static boolean inSession = true;
+	
 	public static void main( String [] arg ) throws Exception
 	{
 		Socket		socket;
 		SocketAddress address;
-		BufferedReader	stdIn;
-		BufferedReader	fromServer;
-		PrintWriter	toServer;
-		String		s;
-		String		result;
 		InetAddress ip;
 		String ipAddr = "";
 		User user;
@@ -85,21 +86,64 @@ public class Client {
 		 * even check to see if a user exists upon adding one.
 		 */
 
-		ip = InetAddress.getByName("cp.cs.rutgers.edu");
-	    ipAddr = ip.getHostAddress();
+		//ip = InetAddress.getByName("cp.cs.rutgers.edu");
+	    //ipAddr = ip.getHostAddress();
 
 	    //socket = connect("cd.cs.rutgers.edu");
 	    //socket = connect(ipAddr);
 	    //System.out.println(socket);
 
 	    //socket = new Socket("cd.cs.rutgers.edu", 8564);
+	    
+	  //For reading all keyboard input. Duh.
+	  	stdIn = new BufferedReader( new InputStreamReader( System.in ) );
+	  	s = stdIn.readLine();
+	  	String name = "";
+	  	
+	  	/*
+	  	 * DO MORE ERROR CHECKING AFTER THIS POINT.
+	  	 * MILAN IS BEING A CUNT ABOUT MULTITHREADING.
+	  	 */
+	  	try
+	  	{
+	  		if(s.length() < 6)
+			{
+	  			s = "ERROR. You must specify a username with the @name command.";
+				s = s.concat("\n");
+				s = s.concat("Please restart the client.");
+				System.out.println(s);
+				System.exit(1);
+			}
+	  		else if(s.equalsIgnoreCase("@name"))
+	  		{
+	  			s = "ERROR. You cannot have an empty username.";
+				s = s.concat("\n");
+				s = s.concat("Please restart the client.");
+				System.out.println(s);
+				System.exit(1);
+	  		}
+	  		else
+	  		{
+	  			name = s.substring(6);
+	  			if(name.length() > 100)
+	  			{
+	  				s = "The username that you entered exceeds 100 characters.";
+					s = s.concat("\n");
+					s = s.concat("Please restart the client with a shorter username.");
+					System.out.println(s);
+					System.exit(1);
+	  			}
+	  		}
+	  	}catch(Exception e)
+	  	{
+	  		
+	  	}
 
 		do {
 			socket = connect( ""/*ipAddr*/);
 		} while ( socket == null );
 
-		//For reading all keyboard input. Duh.
-		stdIn = new BufferedReader( new InputStreamReader( System.in ) );
+		
 
 		//We need/want to get information from the Server.
 		fromServer = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
@@ -110,8 +154,27 @@ public class Client {
 		//Want a reference to the username for use in session thread!
 		//toServer.println(name);
 
-		boolean firstRun = true;
-		String name = "";
+		//s = stdIn.readLine();
+		System.out.println("This is the input: " + s);
+		
+		try
+		{
+			toServer.println(s);
+			result = fromServer.readLine();
+			String nameExists = "User already exists in chat. Please restart client with different username.";
+
+			if(result.equals(nameExists))
+			{
+				System.out.println( result );
+				socket.close();
+			}
+					
+		System.out.println( result );
+			
+		}catch(Exception e)
+		{
+			
+		}
 		
 		String search = "";
 		int count = 0;
@@ -133,69 +196,41 @@ public class Client {
 			fromSearch = fromSearch.concat("................END OF CHAT HISTORY................");
 		}
 		
-		boolean success = false;
+		if(fromSearch.length() > 0) System.out.println(fromSearch);
 		
-		while ( (s = stdIn.readLine()) != null )
+		new Thread(new Client()).start();
+		
+		while((s = stdIn.readLine()) != null && inSession)
+		{
+			if(s.equals("@exit")) inSession = false;
+			toServer.println( s );
+		}
+		
+		socket.close();
+	}
+
+	@Override
+	public void run()
+	{
+		synchronized (this)
 		{
 			try
 			{
-				if(firstRun)
-				{
-					if(s.equalsIgnoreCase("@name"))
+				while((result = fromServer.readLine()) != null)
+				{			
+					if(result.equals("cameFromExit"))
 					{
-						toServer.println( s );
-						String toPrint = "ERROR. You cannot have an empty username.";
-						toPrint = toPrint.concat("\n");
-						toPrint = toPrint.concat("Please restart the client.");
-						System.out.println(toPrint);
-						break;
-					}
-					else if(s.substring(0,6).equalsIgnoreCase("@name "))
-					{
-						toServer.println( s );
-						result = fromServer.readLine();
-						if(result.equals("cameFromNameExists"))
-						{
-							result = "User already exists in chat. Please restart client with different username.";
-							System.out.println( result );
-							break;
-						}
-						else if(result.equals("cameFromNameExists"))
-						{
-							result = "User already exists in chat. Please restart client with different username.";
-							System.out.println( result );
-							break;
-						}
-						
+						result = "You have disconnected.";
 						System.out.println( result );
-						firstRun = false;
-						if(fromSearch.length() > 0) System.out.println(fromSearch);
-						continue;
+						return;
 					}
+					System.out.println( result );
 				}
-			}catch(Exception e)
+			} catch (IOException e)
 			{
-				
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
-			toServer.println( s );
-			result = fromServer.readLine();
-			if(result.equals("cameFromExit"))
-			{
-				result = "You have disconnected.";
-				System.out.println( result );
-				break;
-			}
-			else if(result.equals("bad run"))
-			{
-				String toPrint = "ERROR. You must specify a username with the @name command.";
-				toPrint = toPrint.concat("\n");
-				toPrint = toPrint.concat("Please restart the client.");
-				System.out.println(toPrint);
-				break;
-			}
-			System.out.println( result );
 		}
-		socket.close();
 	}
 }

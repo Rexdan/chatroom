@@ -1,4 +1,8 @@
 import	java.util.*;
+
+import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 import	java.io.*;
 import	java.net.*;
 
@@ -7,12 +11,14 @@ public class Server implements java.io.Serializable
 	private static final long serialVersionUID = 1L;
 	public static ArrayList<String> privateMessages = new ArrayList<String>();
 	public static ArrayList<String> messages = new ArrayList<String>();
+	public static ArrayList<SessionThread> sessions = new ArrayList<SessionThread>();
 	public static ArrayList<User> users;
 	public static String message = "";
 	private static File saveFile;
 	
 	//May have to subtract one from this variable to display messages correctly
 	private static int count = 0;
+	private static int MAX = 20;
 
 	public static void main( String [] arg ) throws Exception
 	{
@@ -22,11 +28,15 @@ public class Server implements java.io.Serializable
 		Socket		socket;
 
 		serverSocket.setReuseAddress( true );
-
+		
 		while ( (socket = serverSocket.accept()) != null )
 		{
 			System.out.println( "Accepted an incoming connection" );
-			new SessionThread( socket ).start();
+			SessionThread sesh = new SessionThread( socket );
+			sessions.add(sesh);
+			int index = sessions.lastIndexOf(sesh);
+			sessions.get(index).start();
+			if(sessions.size() == MAX) return;
 
 		}
 		//After Server shuts down, we want to delete all of the users.

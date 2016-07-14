@@ -1,4 +1,5 @@
 import	java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.sun.webkit.ThemeClient;
 
@@ -10,6 +11,8 @@ import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 public class SessionThread extends Thread {
 
 	private Socket		socket;
+	
+	//private ReentrantLock lock;
 
 	private User user;
 
@@ -35,28 +38,41 @@ public class SessionThread extends Thread {
 	}
 
 	BufferedReader	fromClient;
+	BufferedReader	fromClients;
 	PrintWriter	toClient;
 	String		s;
 	String		name = "";
 	StringBuffer	buffer;
-	boolean cameFromNameExists = false;
-	boolean cameFromNameLong = false;
 	boolean cameFromExit = false;
 	boolean searching = true;
-
+	boolean joined = false;
+	boolean firstRun = true;
+	boolean badRun = false;
+	boolean accepting = false;
+	int userIndex = 0;
+	
 	public void run()
 	{
-		//Server.loadUsers();
-
 		try {
+			
 			fromClient = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 
-			//Server.loadUsers();
-
-			boolean joined = false;
-			boolean firstRun = true;
+			boolean badCommand = true;
+			
+			addUser(fromClient, toClient);
+			
+			if(joined)
+			{
+				toClient.println(s);
+			}
+			else
+			{
+				toClient.println(s);
+				socket.close();
+				return;
+			}
 			
 			toClient.println(Server.messages.size());
 			if(!Server.messages.isEmpty())
@@ -67,105 +83,29 @@ public class SessionThread extends Thread {
 				}
 			}
 			
-			while ( (s = fromClient.readLine()) != null )
+			while ( true )
 			{
+				s = fromClient.readLine();
+				
+				if(s == null)
+				{
+					socket.close();
+					Server.users.set(userIndex, new User());
+					return;
+				}
+				
+				//if(s.length() == 0) continue;
+				
 				buffer = new StringBuffer( s );
 
 				String command = buffer.toString();
 
 				char c = command.charAt(0);
 				command = command.substring(1);
-				
-				boolean badCommand = true;
-				
-				System.out.println("Command right before try: " + command);
-				
-				if(joined == false && firstRun)
-				{
-					/*
-					 * If the very first read isn't an @ command, we quit.
-					 */
-					char blah = s.charAt(0);
-					if(blah != '@')
-					{
-						buffer = new StringBuffer("bad run");
-						toClient.println(buffer.toString());
-						socket.close();
-						return;
-					}
-					else firstRun = false;
-				}
 
 				if(c == '@')
 				{
 					System.out.println("This is the command: " + command);
-					
-					try
-					{
-						/*
-						 * This will always be the first thing to run when a client
-						 * process starts. So, no need to worry about the user object
-						 * being null afterwards. Also double checking to see if a user
-						 * is trying to use the command again via the user == null condition.
-						 */
-						if(command.equalsIgnoreCase("name"))
-						{
-							socket.close();
-							return;
-						}
-						else if(command.substring(0, 5).equalsIgnoreCase("name ") && user == null)
-						{
-							//We have a reference to the username!
-							//Using substring to get rid of the @name bit.
-							name = command.substring(5);
-							//System.out.println(name);
-							if(name.length() > 100)
-							{
-								cameFromNameLong = true;
-								exit();
-								socket.close();
-								return;
-							}
-							user = new User(name);
-							if(!Server.users.isEmpty())
-							{
-								for(int i = 0; i < Server.users.size(); i++)
-								{
-									if(Server.users.get(i) instanceof User)
-									{
-										if(Server.users.get(i).equals(user))
-										{
-											//Server.saveUsers();
-											cameFromNameExists = true;
-											exit();
-											socket.close();
-											return;
-										}
-										else if(Server.users.get(i).equals(""))
-										{
-											randomColorSetter();
-											Server.users.set(i, user);
-											//Server.saveUsers();
-											joined = true;
-											System.out.println(name + " has joined the chat session.");
-											buffer = new StringBuffer("You have joined the chat session.");
-											toClient.println(buffer.toString());
-											badCommand = false;
-											break;
-										}
-									}
-								}
-								if(joined)
-								{
-									joined = false;
-									continue;
-								}
-							}
-						}
-					} catch (Exception e)
-					{
-
-					}
 					
 					/*
 					 * If a user exists, then these commands can be carried out.
@@ -269,17 +209,29 @@ public class SessionThread extends Thread {
 					}
 				}
 
-				message = user.toString();
-				message = message.concat(": ").concat(buffer.toString());
-
-				Server.saveMessage(message);
-
-				//This is how ANYTHING gets sent back to the current client.
-				toClient.println( Server.getMessage() );
-				Server.incrCounter();
-				//System.out.println("Current Count: " + Server.getCount());
+					else
+					{
+						message = user.toString();
+						message = message.concat(": ").concat(buffer.toString());
+						synchronized(this)
+						{
+							Server.saveMessage(message);
+							
+							for(int i = 0; i < Server.sessions.size(); i++)
+							{
+								if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null)
+								{
+									Server.sessions.get(i).write(Server.getMessage());
+								}
+							}
+							
+							//toClient.println(Server.getMessage());
+							
+							Server.incrCounter();
+							//this.counter = Server.getCount();
+						}
+					}
 			}
-			socket.close();
 		}
 		catch ( Exception e )
 		{
@@ -288,20 +240,21 @@ public class SessionThread extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	public void write(String input)
+	{
+		toClient.println(input);
+	}
+	
+	public User getUser()
+	{
+		return this.user;
+	}
 
 	public void exit()
 	{
 		String message = "";
-
-		if(cameFromNameLong)
-		{
-			message = "cameFromNameLong";
-		}
-		else if(cameFromNameExists)
-		{
-			message = "cameFromNameExists";
-		}
-		else if(cameFromExit)
+		if(cameFromExit)
 		{
 			message = "cameFromExit";
 			for(int i = 0; i < Server.users.size(); i++)
@@ -373,5 +326,66 @@ public class SessionThread extends Thread {
 
 		user.setColor(resultingColor);
 
+	}
+	
+	public void addUser(BufferedReader fromClient, PrintWriter toClient) throws IOException
+	{
+		synchronized (this)
+		{
+			try
+			{
+				name = fromClient.readLine();
+					try
+					{
+						this.name = name.substring(1);
+
+						if(name.substring(0, 5).equalsIgnoreCase("name ") && user == null)
+						{
+							//We have a reference to the username!
+							//Using substring to get rid of the @name bit.
+							name = name.substring(5);
+							user = new User(name);
+							if(!Server.users.isEmpty())
+							{
+								for(int i = 0; i < Server.users.size(); i++)
+								{
+									if(Server.users.get(i) instanceof User)
+									{
+										if(Server.users.get(i).equals(user))
+										{
+											//Server.saveUsers();
+											buffer = new StringBuffer("User already exists in chat. Please restart client with different username.");
+											s = buffer.toString();
+											return;
+										}
+										else if(Server.users.get(i).equals(""))
+										{
+											randomColorSetter();
+											Server.users.set(i, user);
+											userIndex = i;
+											//Server.saveUsers();
+											System.out.println(user + " has joined the chat session.");
+											buffer = new StringBuffer("You have joined the chat session.");
+											s = buffer.toString();
+											joined = true;
+											break;
+										}
+									}
+								}
+							}
+						}
+					}catch(Exception e)
+					{
+						System.err.println("ERROR. Something went wrong when we tried to add a user.");
+					}
+
+			}catch(Exception e){
+				System.err.println("ERROR. Something went wrong when we tried to add a user.");
+			}
+		}
+	}
+	public Socket getSocket()
+	{
+		return this.socket;
 	}
 }
