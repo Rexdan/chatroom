@@ -1,12 +1,12 @@
 import	java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
+//import java.util.concurrent.locks.ReentrantLock;
 
-import com.sun.webkit.ThemeClient;
+//import com.sun.webkit.ThemeClient;
 
 import	java.io.*;
 import	java.net.*;
-import java.nio.file.ClosedWatchServiceException;
-import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
+//import java.nio.file.ClosedWatchServiceException;
+//import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 
 public class SessionThread extends Thread {
 
@@ -94,7 +94,7 @@ public class SessionThread extends Thread {
 					return;
 				}
 				
-				//if(s.length() == 0) continue;
+				if(s.length() == 0) continue;
 				
 				buffer = new StringBuffer( s );
 
@@ -194,8 +194,10 @@ public class SessionThread extends Thread {
 							else if(command.equalsIgnoreCase("exit"))
 							{
 								cameFromExit = true;
-								exit();
+								broadcast(message, cameFromExit);
+								//exit();
 								socket.close();
+								closed = true;
 								badCommand = false;
 								return;
 							}
@@ -213,7 +215,8 @@ public class SessionThread extends Thread {
 					{
 						message = user.toString();
 						message = message.concat(": ").concat(buffer.toString());
-						synchronized(this)
+						broadcast(message,cameFromExit);
+						/*synchronized(this)
 						{
 							Server.saveMessage(message);
 							
@@ -224,12 +227,8 @@ public class SessionThread extends Thread {
 									Server.sessions.get(i).write(Server.getMessage());
 								}
 							}
-							
-							//toClient.println(Server.getMessage());
-							
 							Server.incrCounter();
-							//this.counter = Server.getCount();
-						}
+						}*/
 					}
 			}
 		}
@@ -246,6 +245,28 @@ public class SessionThread extends Thread {
 		toClient.println(input);
 	}
 	
+	public void broadcast(String message, boolean blah) throws IOException
+	{
+		synchronized(this)
+		{
+			if(blah)
+			{
+				Server.saveMessage(user + " has exited the chat session.");
+				Server.users.set(userIndex, new User());
+			}
+			else Server.saveMessage(message);
+			
+			for(int i = 0; i < Server.sessions.size(); i++)
+			{
+				if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null)
+				{
+					Server.sessions.get(i).write(Server.getMessage());
+				}
+			}
+			Server.incrCounter();
+		}
+	}
+	
 	public User getUser()
 	{
 		return this.user;
@@ -253,22 +274,19 @@ public class SessionThread extends Thread {
 
 	public void exit()
 	{
-		String message = "";
-		if(cameFromExit)
+
+		for(int i = 0; i < Server.users.size(); i++)
 		{
-			message = "cameFromExit";
-			for(int i = 0; i < Server.users.size(); i++)
+			if(Server.users.get(i).equals(user))
 			{
-				if(Server.users.get(i).equals(user))
-				{
-					Server.users.set(i, new User());
-					//Server.saveUsers();
-					break;
-				}
+				Server.users.set(i, new User());
+				//Server.saveUsers();
+				break;
 			}
-			//CHANGE TO PRINT INTO CHAT HISTORY.
-			System.out.println(user + " has disconnected.");
 		}
+		//CHANGE TO PRINT INTO CHAT HISTORY.
+		System.out.println(user + " has disconnected.");
+		
 
 		buffer = new StringBuffer(message);
 		//System.out.println("RIGHT BEFORE BUFFER: " + buffer.toString());

@@ -1,11 +1,11 @@
 import	java.util.*;
-import java.util.jar.Attributes.Name;
+//import java.util.jar.Attributes.Name;
 
-import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
+//import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
 
-import com.sun.glass.ui.TouchInputSupport;
+//import com.sun.glass.ui.TouchInputSupport;
 
-import sun.security.util.Length;
+//import sun.security.util.Length;
 
 import	java.io.*;
 import	java.net.*;
@@ -138,9 +138,11 @@ public class Client implements Runnable{
 	  	{
 	  		
 	  	}
-
+	  	
+	  	String temp = "192.168.1.126";
+	  	temp = "";
 		do {
-			socket = connect( ""/*ipAddr*/);
+			socket = connect( /*""*/temp);
 		} while ( socket == null );
 
 		
@@ -161,12 +163,21 @@ public class Client implements Runnable{
 		{
 			toServer.println(s);
 			result = fromServer.readLine();
+			
+			if(result.equals("full"))
+			{
+				System.out.println("Server at MAX capacity. Please try again later.");
+				socket.close();
+				System.exit(0);
+			}
+			
 			String nameExists = "User already exists in chat. Please restart client with different username.";
 
 			if(result.equals(nameExists))
 			{
 				System.out.println( result );
 				socket.close();
+				System.exit(0);
 			}
 					
 		System.out.println( result );
@@ -202,8 +213,12 @@ public class Client implements Runnable{
 		
 		while((s = stdIn.readLine()) != null && inSession)
 		{
-			if(s.equals("@exit")) inSession = false;
 			toServer.println( s );
+			if(s.equals("@exit"))
+			{
+				inSession = false;
+				break;
+			}
 		}
 		
 		socket.close();
@@ -217,19 +232,21 @@ public class Client implements Runnable{
 			try
 			{
 				while((result = fromServer.readLine()) != null)
-				{			
-					if(result.equals("cameFromExit"))
-					{
-						result = "You have disconnected.";
-						System.out.println( result );
-						return;
-					}
+				{	
 					System.out.println( result );
 				}
 			} catch (IOException e)
 			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if(inSession == false)
+				{
+					System.out.println("You have exited the chat session.");
+					System.exit(0);
+				}
+				else
+				{
+					System.err.println("Houston, we have a problem.");
+					System.exit(1);
+				}
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 import	java.util.*;
 
-import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+//import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
+//import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import	java.io.*;
 import	java.net.*;
@@ -32,12 +32,17 @@ public class Server implements java.io.Serializable
 		while ( (socket = serverSocket.accept()) != null )
 		{
 			System.out.println( "Accepted an incoming connection" );
+			if(sessions.size() == MAX)
+			{
+				String message = "full";
+				PrintWriter toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
+				toClient.println(message);
+				socket.close();
+			}
 			SessionThread sesh = new SessionThread( socket );
 			sessions.add(sesh);
 			int index = sessions.lastIndexOf(sesh);
 			sessions.get(index).start();
-			if(sessions.size() == MAX) return;
-
 		}
 		//After Server shuts down, we want to delete all of the users.
 		resetAllUsers();
@@ -67,16 +72,16 @@ public class Server implements java.io.Serializable
 
 	public static void resetAllUsers()
 	{
-		saveFile = new File("src/users.txt");
+		//saveFile = new File("src/users.txt");
 		users = new ArrayList<User>(20);
 		for(int i = 0; i < 20; i++)
 		{
 			users.add(i, new User());
 		}
-		saveUsers();
+		//saveUsers();
 	}
 
-	public static void loadUsers(){
+	/*public static void loadUsers(){
 
 	  	try {
 			saveFile = new File("src/users.txt");
@@ -118,5 +123,5 @@ public class Server implements java.io.Serializable
 		} catch(Exception e) {
 		    e.printStackTrace();
 		}
-	}
+	}*/
 }
