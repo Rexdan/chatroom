@@ -6,10 +6,22 @@ public class User extends ArrayList<User>
 	private String color;
 	private String endingColor = "\033[0m";
 	private boolean exiting = false;
+	public boolean pc = false;
+	private int senderIndex;
 
 	public void setExiting(boolean exiting)
 	{
 		this.exiting = exiting;
+	}
+	
+	public void setSenderIndex(int senderIndex)
+	{
+		this.senderIndex = senderIndex;
+	}
+	
+	public int getSenderIndex()
+	{
+		return this.senderIndex;
 	}
 
 	public boolean isExiting()

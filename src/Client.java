@@ -1,12 +1,4 @@
 import	java.util.*;
-//import java.util.jar.Attributes.Name;
-
-//import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
-
-//import com.sun.glass.ui.TouchInputSupport;
-
-//import sun.security.util.Length;
-
 import	java.io.*;
 import	java.net.*;
 
