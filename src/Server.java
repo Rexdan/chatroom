@@ -1,4 +1,7 @@
 import	java.util.*;
+
+import com.sun.glass.ui.TouchInputSupport;
+
 import	java.io.*;
 import	java.net.*;
 
@@ -20,6 +23,7 @@ public class Server implements java.io.Serializable
 	{
 		//After Server loads, we want to delete any previous users.
 		resetAllUsers();
+		loadHistory();
 		ServerSocket	serverSocket = new ServerSocket( 8564, 20 );
 		Socket		socket;
 
@@ -30,7 +34,7 @@ public class Server implements java.io.Serializable
 			System.out.println( "Accepted an incoming connection" );
 			if(sessions.size() == MAX)
 			{
-				String message = "full";
+				String message = "Server is full.";
 				PrintWriter toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 				toClient.println(message);
 				socket.close();
@@ -41,7 +45,9 @@ public class Server implements java.io.Serializable
 			sessions.get(index).start();
 		}
 		//After Server shuts down, we want to delete all of the users.
+		
 		resetAllUsers();
+		
 		serverSocket.close();
 	}
 
@@ -68,37 +74,33 @@ public class Server implements java.io.Serializable
 
 	public static void resetAllUsers()
 	{
-		//saveFile = new File("src/users.txt");
 		users = new ArrayList<User>(20);
 		for(int i = 0; i < 20; i++)
 		{
 			users.add(i, new User());
 		}
-		//saveUsers();
 	}
 
-	/*public static void loadUsers(){
+	public static void loadHistory(){
 
 	  	try {
-			saveFile = new File("src/users.txt");
-			BufferedReader br = new BufferedReader(new FileReader("src/users.txt"));
+			saveFile = new File("src/history.txt");
+			BufferedReader br = new BufferedReader(new FileReader("src/history.txt"));
 			String line = br.readLine();
 			if (line == null) {
-				//System.out.println("line is null and test exists");
-				 	FileInputStream fis = new FileInputStream("src/users.txt");
+				 	FileInputStream fis = new FileInputStream("src/history.txt");
 				    //ObjectInputStream ois = new ObjectInputStream(fis);
-				    users = new ArrayList<User>(20);
-				    for(int i = 0; i < 20; i++)
-					{
-						users.add(i,new User());
-					}
+				    messages = new ArrayList<String>();
+				    count = 0;
 				    //fis.close();
-				    //ois.close();
 			}
 			else if (line != null){
-				FileInputStream fis = new FileInputStream("src/users.txt");
+				FileInputStream fis = new FileInputStream("src/history.txt");
 			    ObjectInputStream ois = new ObjectInputStream(fis);
-			    users = (ArrayList<User>)ois.readObject();
+			    messages = (ArrayList<String>)ois.readObject();
+			    count = (int)ois.readObject();
+			    count += 2;
+			    System.out.println("this is the count: " + count);
 			    ois.close();
 			}
 		} catch(Exception e) {
@@ -106,18 +108,21 @@ public class Server implements java.io.Serializable
 		}
 	}
 
-	public static void saveUsers(){
-		ArrayList<User> temp = new ArrayList<User>();
-
-		temp.addAll(users);
+	public static void saveHistory(){
+		ArrayList<String> temp = new ArrayList<String>();
+		
+		temp.addAll(messages);
+		int last = count;
+		
 		try {
 		    FileOutputStream fos = new FileOutputStream(saveFile);
 		    ObjectOutputStream oos = new ObjectOutputStream(fos);
 		    oos.writeObject(temp);
+		    oos.writeObject(last);
 		    oos.flush();
 		    oos.close();
 		} catch(Exception e) {
 		    e.printStackTrace();
 		}
-	}*/
+	}
 }

@@ -50,6 +50,8 @@ public class SessionThread extends Thread {
 	{
 		try {
 			
+			//Server.loadHistory();
+			
 			fromClient = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
@@ -358,6 +360,7 @@ public class SessionThread extends Thread {
 			{
 				String exitString = user + " has exited the chat session.";
 				Server.saveMessage(exitString);
+				Server.saveHistory();
 				Server.users.set(userIndex, new User());
 				if(this.user.pc)
 				{
@@ -386,6 +389,7 @@ public class SessionThread extends Thread {
 			{
 
 				Server.saveMessage(message);
+				Server.saveHistory();
 				
 				for(int i = 0; i < Server.sessions.size(); i++)
 				{
