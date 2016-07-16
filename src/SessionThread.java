@@ -49,14 +49,13 @@ public class SessionThread extends Thread {
 
 			boolean badCommand = true;
 			
-			addUser(fromClient, toClient);
-			
-			//This is so we can append the start of each of the user's messages with their name on their end.
-			toClient.println(user);
+			addUser(fromClient);
 			
 			if(joined)
 			{
 				toClient.println(s);
+				//This is so we can append the start of each of the user's messages with their name on their end.
+				toClient.println(user);
 			}
 			else
 			{
@@ -65,6 +64,7 @@ public class SessionThread extends Thread {
 				return;
 			}
 			
+			//Printing chat history on Client side.
 			toClient.println(Server.messages.size());
 			if(!Server.messages.isEmpty())
 			{
@@ -118,141 +118,6 @@ public class SessionThread extends Thread {
 						{
 							
 						}
-						
-						/*try
-						{
-							
-
-							if(command.equalsIgnoreCase("private"))
-							{
-								buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
-								toClient.println(buffer.toString());
-								continue;
-							}
-							
-							else if(command.substring(0,8).equalsIgnoreCase("private "))
-							{
-								if(command.substring(8).length() == 0)
-								{
-									buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
-									toClient.println(buffer.toString());
-									continue;
-								}
-								
-								User otherUser = new User(command.substring(8));
-								
-								if(otherUser.equals(this.user))
-								{
-									toClient.println("Why would you want to private chat with yourself?" + "\n" + "Going back to Public Chat...");
-									continue;
-								}
-								
-								int count = 0;
-								int i = 0;
-								
-								while(i < Server.sessions.size())
-								{
-									if(Server.sessions.get(i).getUser().equals(otherUser))
-									{
-										//To have a reference to the FULL user object, not just name.
-										otherUser = Server.sessions.get(i).getUser();
-										if(Server.sessions.get(i).getUser().pc == true && count <= 10)
-										{
-											int currentCount = count + 10 + count--;
-											toClient.println(otherUser + " is currently in a private chat session. " + "Retrying " + (currentCount) + " more times.");
-											count++;
-											continue;
-										}
-										else
-										{
-											//Directly setting their status in arraylist.
-											Server.sessions.get(i).getUser().pc = true;
-											//We want a reference to the user/session that THIS user is allowed to send messages to.
-											Server.sessions.get(i).getUser().setSenderIndex(this.userIndex);
-											toClient.println("You are now in a PRIVATE chat session with: " + otherUser);
-											Server.sessions.get(i).write(getUser() + " has started to private chat with you.");
-											inPrivateSession = true;
-											pcs++;
-											break;
-										}
-									}
-									i++;
-								}
-								badCommand = false;
-								continue;
-							}
-						}catch(Exception e)
-						{
-							
-						}*/
-						
-						/*try
-						{
-							if(command.equalsIgnoreCase("end"))
-							{
-								buffer = new StringBuffer("You must specify a user to terminate the private conversation.");
-								toClient.println(buffer.toString());
-								continue;
-							}
-							else if(command.substring(0, 4).equals("end "))
-							{
-								if(command.substring(4).length() == 0)
-								{
-									buffer = new StringBuffer("You must specify a user to terminate the private conversation.");
-									toClient.println(buffer.toString());
-									continue;
-								}
-								
-								User otherUser = new User(command.substring(4));
-								
-								if(otherUser.equals(this.user))
-								{
-									toClient.println("Why would you want to terminate the private chat with yourself?" + "\n" + "Going back to Public Chat...");
-									continue;
-								}
-								else
-								{
-									int i = 0;
-									
-									synchronized (this)
-									{
-										while(i < Server.sessions.size())
-										{
-											if(Server.sessions.get(i).getUser().equals(otherUser))
-											{
-												//To have a reference to the FULL user object, not just name.
-												otherUser = Server.sessions.get(i).getUser();
-												if(Server.sessions.get(i).getUser().getSenderIndex() != this.userIndex)
-												{
-													toClient.println("You are not in a private chat session with " + otherUser);
-													break;
-												}
-												else if(Server.sessions.get(i).getUser().pc == false)
-												{
-													toClient.println("You cannot terminate the private chat session with " + otherUser + " because that user is not currently set to receive any private messages...");
-													break;
-												}
-												else if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderIndex() == this.userIndex)
-												{
-													pcs--;
-													Server.sessions.get(i).getUser().pc = false;
-													toClient.println("You have terminated your private chat session with: " + otherUser);
-													Server.sessions.get(i).write(user + " has terminated their private session with you.");
-													break;
-												}
-											}
-											i++;
-										}
-									}
-									badCommand = false;
-									continue;
-								}
-							}
-						}catch(Exception e)
-						{
-							
-						}*/
-
 							if(command.equalsIgnoreCase("who"))
 							{
 								String result = "List of Active Users: ";
@@ -459,7 +324,7 @@ public class SessionThread extends Thread {
 
 	}
 	
-	private void addUser(BufferedReader fromClient, PrintWriter toClient) throws IOException
+	private void addUser(BufferedReader fromClient) throws IOException
 	{
 		synchronized (this)
 		{
@@ -484,7 +349,6 @@ public class SessionThread extends Thread {
 									{
 										if(Server.users.get(i).equals(user))
 										{
-											//Server.saveUsers();
 											buffer = new StringBuffer("User already exists in chat. Please restart client with different username.");
 											s = buffer.toString();
 											return;
@@ -494,7 +358,6 @@ public class SessionThread extends Thread {
 											randomColorSetter();
 											Server.users.set(i, user);
 											userIndex = i;
-											//Server.saveUsers();
 											System.out.println(user + " has joined the chat session.");
 											buffer = new StringBuffer("You have joined the chat session.");
 											s = buffer.toString();

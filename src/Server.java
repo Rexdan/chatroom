@@ -11,7 +11,7 @@ public class Server implements java.io.Serializable
 	private static File saveFile;
 	
 	//May have to subtract one from this variable to display messages correctly
-	private static int MAX = 20;
+	private final static int MAX = 20;
 
 	public static void main( String [] arg ) throws Exception
 	{
@@ -20,23 +20,26 @@ public class Server implements java.io.Serializable
 		loadHistory();
 		ServerSocket	serverSocket = new ServerSocket( 8564, 20 );
 		Socket		socket;
-
 		serverSocket.setReuseAddress( true );
 		
 		while ( (socket = serverSocket.accept()) != null )
-		{
-			System.out.println( "Accepted an incoming connection" );
+		{		
 			if(sessions.size() == MAX)
 			{
+				System.out.println( "Server is full. No longer accepting other connections." );
 				String message = "Server is full.";
 				PrintWriter toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
 				toClient.println(message);
 				socket.close();
 			}
-			SessionThread sesh = new SessionThread( socket );
-			sessions.add(sesh);
-			int index = sessions.lastIndexOf(sesh);
-			sessions.get(index).start();
+			else
+			{
+				System.out.println( "Accepted an incoming connection" );
+				SessionThread sesh = new SessionThread( socket );
+				sessions.add(sesh);
+				int index = sessions.lastIndexOf(sesh);
+				sessions.get(index).start();
+			}
 		}
 		//After Server shuts down, we want to delete all of the users.
 		

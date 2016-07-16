@@ -145,19 +145,20 @@ public class Client implements Runnable{
 		{
 			toServer.println(s);
 			result = fromServer.readLine();
-			
-			if(result.equals("full"))
-			{
-				System.out.println("Server at MAX capacity. Please try again later.");
-				socket.close();
-				System.exit(0);
-			}
+			name = fromServer.readLine();
 			
 			String nameExists = "User already exists in chat. Please restart client with different username.";
 
 			if(result.equals(nameExists))
 			{
 				System.out.println( result );
+				socket.close();
+				System.exit(0);
+			}
+			
+			if(result.equals("Server is full."))
+			{
+				System.out.println("Server at MAX capacity. Please try again later.");
 				socket.close();
 				System.exit(0);
 			}
@@ -168,9 +169,8 @@ public class Client implements Runnable{
 		{
 			
 		}
-		
+	
 		//To have the name appended at the beginning of each new message by user.
-		name = fromServer.readLine();
 		String search = "";
 		int count = 0;
 		search = fromServer.readLine();
@@ -195,9 +195,12 @@ public class Client implements Runnable{
 		
 		new Thread(new Client()).start();
 		
+		//For first run.
+		System.out.print(name + ": ");
+		
 		while((s = stdIn.readLine()) != null && inSession)
 		{
-			System.out.print(name);
+			System.out.print(name + ": ");
 			toServer.println( s );
 			if(s.equals("@exit"))
 			{
