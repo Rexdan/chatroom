@@ -4,15 +4,26 @@ import	java.net.*;
 
 public class SessionThread extends Thread {
 
-	private Socket		socket;
+	private Socket	socket;
 	
 	private User user;
 
 	private static boolean closed = false;
 
-	public ArrayList<String> privateMessages = new ArrayList<String>();
-
 	private String message;
+	BufferedReader	fromClient;
+	PrintWriter	toClient;
+	String	s;
+	String	name = "";
+	String command = "";
+	StringBuffer buffer;
+	boolean cameFromExit = false;
+	boolean joined = false;
+	boolean firstRun = true;
+	boolean badRun = false;
+	boolean inPrivateSession = false;
+	int userIndex = 0;
+	int pcs = 0;
 
 	public SessionThread( Socket s )
 	{
@@ -28,30 +39,10 @@ public class SessionThread extends Thread {
 	{
 		return this.message;
 	}
-
-	BufferedReader	fromClient;
-	BufferedReader	fromClients;
-	PrintWriter	toClient;
-	String		s;
-	String		name = "";
-	StringBuffer	buffer;
-	boolean cameFromExit = false;
-	boolean searching = true;
-	boolean joined = false;
-	boolean firstRun = true;
-	boolean badRun = false;
-	boolean accepting = false;
-	boolean inPrivateSession = false;
-	public ArrayList<SessionThread> privateSessions = new ArrayList<SessionThread>();
-	int userIndex = 0;
-	int pcs = 0;
 	
 	public void run()
 	{
 		try {
-			
-			//Server.loadHistory();
-			
 			fromClient = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
@@ -59,6 +50,9 @@ public class SessionThread extends Thread {
 			boolean badCommand = true;
 			
 			addUser(fromClient, toClient);
+			
+			//This is so we can append the start of each of the user's messages with their name on their end.
+			toClient.println(user);
 			
 			if(joined)
 			{
@@ -95,7 +89,7 @@ public class SessionThread extends Thread {
 				
 				buffer = new StringBuffer( s );
 
-				String command = buffer.toString();
+				command = buffer.toString();
 
 				char c = command.charAt(0);
 				command = command.substring(1);
@@ -107,21 +101,35 @@ public class SessionThread extends Thread {
 					 */
 					if(user != null)
 					{
+						
 						try
 						{
-							/*
-							 * Case where user simply types "@private"
-							 */
+							if(command.substring(0,7).equalsIgnoreCase("private"))
+							{
+								privateChat();	
+							}
+							else if(command.substring(0, 3).equals("end"))
+							{
+								endPrivateChat();
+							}
+							badCommand = false;
+							continue;
+						}catch(Exception e)
+						{
+							
+						}
+						
+						/*try
+						{
+							
+
 							if(command.equalsIgnoreCase("private"))
 							{
 								buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
 								toClient.println(buffer.toString());
 								continue;
 							}
-							/*
-							 * Case where user types "@private " where the space can be either empty
-							 * or with a username.
-							 */
+							
 							else if(command.substring(0,8).equalsIgnoreCase("private "))
 							{
 								if(command.substring(8).length() == 0)
@@ -176,9 +184,9 @@ public class SessionThread extends Thread {
 						}catch(Exception e)
 						{
 							
-						}
+						}*/
 						
-						try
+						/*try
 						{
 							if(command.equalsIgnoreCase("end"))
 							{
@@ -243,10 +251,8 @@ public class SessionThread extends Thread {
 						}catch(Exception e)
 						{
 							
-						}
+						}*/
 
-						//finally
-						//{
 							if(command.equalsIgnoreCase("who"))
 							{
 								String result = "List of Active Users: ";
@@ -260,12 +266,12 @@ public class SessionThread extends Thread {
 									{
 										if(first == true)
 										{
-											result = result.concat(Server.users.get(i).getName());
+											result = result.concat(Server.users.get(i).toString());
 											first = false;
 										}
 										else
 										{
-											result = result.concat(", " + Server.users.get(i).getName());
+											result = result.concat(", " + Server.users.get(i).toString());
 											singleUser = false;
 										}
 									}
@@ -288,15 +294,12 @@ public class SessionThread extends Thread {
 							{
 								cameFromExit = true;
 								broadcast(message, cameFromExit);
-								//exit();
 								System.out.println(user + " has exited the chat session.");
 								socket.close();
 								closed = true;
 								badCommand = false;
 								return;
 							}
-							
-						//}
 					}
 					if(badCommand)
 					{
@@ -311,19 +314,7 @@ public class SessionThread extends Thread {
 						message = user.toString();
 						message = message.concat(": ").concat(buffer.toString());
 						broadcast(message,cameFromExit);
-						/*synchronized(this)
-						{
-							Server.saveMessage(message);
-							
-							for(int i = 0; i < Server.sessions.size(); i++)
-							{
-								if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null)
-								{
-									Server.sessions.get(i).write(Server.getMessage());
-								}
-							}
-							Server.incrCounter();
-						}*/
+
 					}
 			}
 		}
@@ -347,19 +338,18 @@ public class SessionThread extends Thread {
 		pcs--;
 	}
 	
-	public void broadcast(String message, boolean blah) throws IOException
+	private void broadcast(String message, boolean userExited) throws IOException
 	{
 		synchronized(this)
 		{
 			if(pcs == 0)
 			{
-				//System.out.println("NO LONGER IN PRIVATE SESSION");
 				inPrivateSession = false;
 			}
-			if(blah)
+			if(userExited)
 			{
-				String exitString = user + " has exited the chat session.";
-				Server.saveMessage(exitString);
+				message = user + " has exited the chat session.";
+				Server.saveMessage(message);
 				Server.saveHistory();
 				Server.users.set(userIndex, new User());
 				if(this.user.pc)
@@ -369,7 +359,6 @@ public class SessionThread extends Thread {
 						if(Server.sessions.get(i).userIndex == (this.user.getSenderIndex()))
 						{
 							Server.sessions.get(i).receiverExited(this.userIndex);
-							//Server.sessions.get(i).write(Server.getMessage());
 						}
 					}
 				}
@@ -387,18 +376,16 @@ public class SessionThread extends Thread {
 			}
 			else
 			{
-
 				Server.saveMessage(message);
 				Server.saveHistory();
 				
 				for(int i = 0; i < Server.sessions.size(); i++)
 				{
-					if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null && Server.sessions.get(i).inPrivateSession == false)
+					if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null && Server.sessions.get(i).inPrivateSession == false && !Server.sessions.get(i).getUser().equals(this.user))
 					{
-						Server.sessions.get(i).write(Server.getMessage());
+						Server.sessions.get(i).write(message);
 					}
 				}
-				Server.incrCounter();
 			}
 		}
 	}
@@ -410,29 +397,22 @@ public class SessionThread extends Thread {
 
 	public void exit()
 	{
-
 		for(int i = 0; i < Server.users.size(); i++)
 		{
 			if(Server.users.get(i).equals(user))
 			{
 				Server.users.set(i, new User());
-				//Server.saveUsers();
 				break;
 			}
 		}
 		System.out.println(user + " has disconnected.");
-		
 		buffer = new StringBuffer(message);
 		toClient.println(buffer.toString());
 		closed = true;
 	}
 
-	public void randomColorSetter()
+	private void randomColorSetter()
 	{
-		/*
-		 * This is for giving the username a color and it does it randomly.
-		 */
-
 		String resultingColor = "";
 
 		Random rn = new Random();
@@ -479,7 +459,7 @@ public class SessionThread extends Thread {
 
 	}
 	
-	public void addUser(BufferedReader fromClient, PrintWriter toClient) throws IOException
+	private void addUser(BufferedReader fromClient, PrintWriter toClient) throws IOException
 	{
 		synchronized (this)
 		{
@@ -535,6 +515,147 @@ public class SessionThread extends Thread {
 			}
 		}
 	}
+	
+	private void privateChat()
+	{
+		try
+		{
+			/*
+			 * Case where user simply types "@private"
+			 */
+			if(command.equalsIgnoreCase("private"))
+			{
+				buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
+				toClient.println(buffer.toString());
+				return;
+			}
+			/*
+			 * Case where user types "@private " where the space can be either empty
+			 * or with a username.
+			 */
+			else if(command.substring(0,8).equalsIgnoreCase("private "))
+			{
+				if(command.substring(8).length() == 0)
+				{
+					buffer = new StringBuffer("You must specify a user to initiate the private conversation.");
+					toClient.println(buffer.toString());
+					return;
+				}
+				
+				User otherUser = new User(command.substring(8));
+				
+				if(otherUser.equals(this.user))
+				{
+					toClient.println("Why would you want to private chat with yourself?" + "\n" + "Going back to Public Chat...");
+					return;
+				}
+				
+				int count = 0;
+				int i = 0;
+				
+				while(i < Server.sessions.size())
+				{
+					if(Server.sessions.get(i).getUser().equals(otherUser))
+					{
+						//To have a reference to the FULL user object, not just name.
+						otherUser = Server.sessions.get(i).getUser();
+						if(Server.sessions.get(i).getUser().pc == true && count <= 10)
+						{
+							int currentCount = count + 10 + count--;
+							toClient.println(otherUser + " is currently in a private chat session. " + "Retrying " + (currentCount) + " more times.");
+							count++;
+							continue;
+						}
+						else
+						{
+							//Directly setting their status in arraylist.
+							Server.sessions.get(i).getUser().pc = true;
+							//We want a reference to the user/session that THIS user is allowed to send messages to.
+							Server.sessions.get(i).getUser().setSenderIndex(this.userIndex);
+							toClient.println("You are now in a PRIVATE chat session with: " + otherUser);
+							Server.sessions.get(i).write(getUser() + " has started to private chat with you.");
+							inPrivateSession = true;
+							pcs++;
+							return;
+						}
+					}
+					i++;
+				}
+			}
+		}catch(Exception e)
+		{
+			
+		}
+	}
+	
+	private void endPrivateChat()
+	{
+		try
+		{
+			if(command.equalsIgnoreCase("end"))
+			{
+				buffer = new StringBuffer("You must specify a user to terminate the private conversation.");
+				toClient.println(buffer.toString());
+				return;
+			}
+			else if(command.substring(0, 4).equals("end "))
+			{
+				if(command.substring(4).length() == 0)
+				{
+					buffer = new StringBuffer("You must specify a user to terminate the private conversation.");
+					toClient.println(buffer.toString());
+					return;
+				}
+				
+				User otherUser = new User(command.substring(4));
+				
+				if(otherUser.equals(this.user))
+				{
+					toClient.println("Why would you want to terminate the private chat with yourself?" + "\n" + "Going back to Public Chat...");
+					return;
+				}
+				else
+				{
+					int i = 0;
+					
+					synchronized (this)
+					{
+						while(i < Server.sessions.size())
+						{
+							if(Server.sessions.get(i).getUser().equals(otherUser))
+							{
+								//To have a reference to the FULL user object, not just name.
+								otherUser = Server.sessions.get(i).getUser();
+								if(Server.sessions.get(i).getUser().getSenderIndex() != this.userIndex)
+								{
+									toClient.println("You are not in a private chat session with " + otherUser);
+									return;
+								}
+								else if(Server.sessions.get(i).getUser().pc == false)
+								{
+									toClient.println("You cannot terminate the private chat session with " + otherUser + " because that user is not currently set to receive any private messages...");
+									return;
+								}
+								else if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderIndex() == this.userIndex)
+								{
+									pcs--;
+									Server.sessions.get(i).getUser().pc = false;
+									toClient.println("You have terminated your private chat session with: " + otherUser);
+									Server.sessions.get(i).write(user + " has terminated their private session with you.");
+									return;
+								}
+							}
+							i++;
+						}
+					}
+				}
+			}
+		}catch(Exception e)
+		{
+			
+		}
+	}
+	
 	public Socket getSocket()
 	{
 		return this.socket;

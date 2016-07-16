@@ -37,65 +37,54 @@ public class Client implements Runnable{
 	public static void main( String [] arg ) throws Exception
 	{
 		Socket		socket;
-		SocketAddress address;
 		InetAddress ip;
 		String ipAddr = "";
-		User user;
-
-		/*try
-		{
-		      ip = InetAddress.getByName(arg[0]);
-		      ipAddr = ip.getHostAddress();
-			{
-			};
-		      System.out.println("IP address: " + ip.getHostAddress());
-		} catch ( UnknownHostException e1 ) {
-		      System.out.println("Could not find IP address for: " + arg[0]);
-	    }
-
+		
 		try
+	  	{
+			ipAddr = arg[0];
+	  		//ip = InetAddress.getByName(arg[0]);
+	  		if(ipAddr.isEmpty())
+	  		{
+	  			System.err.println("You must specify a host address.");
+	  			System.exit(1);
+	  		}
+	  	}
+	  	catch(Exception e)
+	  	{
+	  		System.err.println("You dun goofed.");
+	  	}
+	  	
+	  	try
 		{
-			port = Integer.parseInt(arg[1]);
-			System.out.println(port);
+	  		if(arg[1].isEmpty())
+	  		{
+	  			System.err.println("You must provide a port number as the second argument.");
+	  			System.exit(1);
+	  		}
+	  		else
+	  		{
+	  			for(int i = 0; i < arg[1].length(); i++)
+	  			{
+	  				if(!Character.isDigit(arg[1].charAt(i)))
+	  				{
+	  					System.err.println("You must provide a port number as the second argument.");
+	  		  			System.exit(1);
+	  					break;
+	  				}
+	  			}
+	  		}
+	  		port = Integer.parseInt(arg[1]);
 		} catch (Exception e2)
 		{
-				System.out.println("You fucked up.");
+				System.out.println("You dun goofed.");
 				System.exit(1);
 		}
 
-		try
-		{
-			user = new User(arg[2]);
-			System.out.println(user.getName().toString());
-		} catch (Exception e3)
-		{
-			// TODO: handle exception
-		}*/
-
-		/*
-		 * We have this here because the ArrayList of users MUST
-		 * have each index equal to some sort of object before we can
-		 * even check to see if a user exists upon adding one.
-		 */
-
-		//ip = InetAddress.getByName("cp.cs.rutgers.edu");
-	    //ipAddr = ip.getHostAddress();
-
-	    //socket = connect("cd.cs.rutgers.edu");
-	    //socket = connect(ipAddr);
-	    //System.out.println(socket);
-
-	    //socket = new Socket("cd.cs.rutgers.edu", 8564);
-	    
-	  //For reading all keyboard input. Duh.
 	  	stdIn = new BufferedReader( new InputStreamReader( System.in ) );
 	  	s = stdIn.readLine();
 	  	String name = "";
 	  	
-	  	/*
-	  	 * DO MORE ERROR CHECKING AFTER THIS POINT.
-	  	 * MILAN IS BEING A CUNT ABOUT MULTITHREADING.
-	  	 */
 	  	try
 	  	{
 	  		if(s.length() < 6)
@@ -133,8 +122,9 @@ public class Client implements Runnable{
 	  	
 	  	String temp = "192.168.1.126";
 	  	temp = "";
+	  	
 		do {
-			socket = connect( /*""*/temp);
+			socket = connect(ipAddr);
 		} while ( socket == null );
 
 		
@@ -149,7 +139,7 @@ public class Client implements Runnable{
 		//toServer.println(name);
 
 		//s = stdIn.readLine();
-		System.out.println("This is the input: " + s);
+		//System.out.println("This is the input: " + s);
 		
 		try
 		{
@@ -179,6 +169,8 @@ public class Client implements Runnable{
 			
 		}
 		
+		//To have the name appended at the beginning of each new message by user.
+		name = fromServer.readLine();
 		String search = "";
 		int count = 0;
 		search = fromServer.readLine();
@@ -205,6 +197,7 @@ public class Client implements Runnable{
 		
 		while((s = stdIn.readLine()) != null && inSession)
 		{
+			System.out.print(name);
 			toServer.println( s );
 			if(s.equals("@exit"))
 			{
