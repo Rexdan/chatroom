@@ -23,6 +23,7 @@ public class SessionThread extends Thread {
 	boolean firstRun = true;
 	boolean badRun = false;
 	boolean inPrivateSession = false;
+	boolean weird = false;
 	int userIndex = 0;
 	int pcs = 0;
 
@@ -47,8 +48,6 @@ public class SessionThread extends Thread {
 			fromClient = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
 			toClient = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
-
-			boolean badCommand = true;
 			
 			addUser(fromClient);
 			
@@ -75,10 +74,10 @@ public class SessionThread extends Thread {
 				}
 			}
 			
-			while ( true )
+			while ( (s = fromClient.readLine()) != null )
 			{	
-				s = fromClient.readLine();
-				
+				//s = fromClient.readLine();
+
 				if(s == null)
 				{
 					socket.close();
@@ -102,86 +101,52 @@ public class SessionThread extends Thread {
 					 */
 					if(user != null)
 					{
-						
+						if(command.equalsIgnoreCase("who"))
+						{
+							listUsers();
+							continue;
+						}
+						else if(command.equalsIgnoreCase("exit"))
+						{
+							cameFromExit = true;
+							broadcast(message, cameFromExit);
+							System.out.println(user + " has exited the chat session.");
+							socket.close();
+							closed = true;
+							return;
+						}
 						try
 						{
-							if(command.substring(0,7).equalsIgnoreCase("private"))
-							{
-								privateChat();	
-							}
-							else if(command.substring(0, 3).equals("end"))
+							if(command.substring(0, 3).equals("end"))
 							{
 								endPrivateChat();
+								continue;
 							}
-							badCommand = false;
-							continue;
+							else if(command.substring(0, 4).equals("name"))
+							{
+								toClient.println("You may not change your username.");
+								continue;
+							}
+							else if(command.substring(0,7).equalsIgnoreCase("private"))
+							{
+								privateChat();
+								continue;
+							}
 						}catch(Exception e)
 						{
 							
 						}
-							if(command.equalsIgnoreCase("who"))
-							{
-								String result = "List of Active Users: ";
 
-								boolean first = true;
-								boolean singleUser = true;
-						
-								for(int i = 0; i < Server.users.size(); i++)
-								{
-									if(!Server.users.get(i).getName().equals(""))
-									{
-										if(first == true)
-										{
-											result = result.concat(Server.users.get(i).toString());
-											first = false;
-										}
-										else
-										{
-											result = result.concat(", " + Server.users.get(i).toString());
-											singleUser = false;
-										}
-									}
-								}
-								if(singleUser = false)
-								{
-									result = result.substring(0, result.length() - 2);
-									result = result.concat(".");
-								}
-								else
-								{
-									result = result.concat(".");
-								}
-								buffer = new StringBuffer(result);
-								toClient.println(buffer.toString());
-								badCommand = false;
-								continue;
-							}
-							else if(command.equalsIgnoreCase("exit"))
-							{
-								cameFromExit = true;
-								broadcast(message, cameFromExit);
-								System.out.println(user + " has exited the chat session.");
-								socket.close();
-								closed = true;
-								badCommand = false;
-								return;
-							}
-					}
-					if(badCommand)
-					{
-						toClient.println("ERROR. This is not a command.");
-						System.out.println("ERROR. This is not a command.");
-						continue;
+					toClient.println("ERROR. This is not a command.");
+					continue;
 					}
 				}
-
-					else
-					{
-						message = user.toString();
-						message = message.concat(": ").concat(buffer.toString());
-						broadcast(message,cameFromExit);
-
-					}
+				else
+				{
+					message = user.toString();
+					message = message.concat(": ").concat(buffer.toString());
+					broadcast(message,cameFromExit);
+				}
 			}
 		}
 		catch ( Exception e )
@@ -208,10 +173,6 @@ public class SessionThread extends Thread {
 	{
 		synchronized(this)
 		{
-			if(pcs == 0)
-			{
-				inPrivateSession = false;
-			}
 			if(userExited)
 			{
 				message = user + " has exited the chat session.";
@@ -260,25 +221,11 @@ public class SessionThread extends Thread {
 	{
 		return this.user;
 	}
-
-	public void exit()
-	{
-		for(int i = 0; i < Server.users.size(); i++)
-		{
-			if(Server.users.get(i).equals(user))
-			{
-				Server.users.set(i, new User());
-				break;
-			}
-		}
-		System.out.println(user + " has disconnected.");
-		buffer = new StringBuffer(message);
-		toClient.println(buffer.toString());
-		closed = true;
-	}
-
+	
 	private void randomColorSetter()
 	{
+		synchronized(this)
+		{
 		String resultingColor = "";
 
 		Random rn = new Random();
@@ -310,19 +257,43 @@ public class SessionThread extends Thread {
 		//from 30 to 37
 		String thirdPart = "";
 		int forThirdPart = 30 + rn.nextInt(37 - 30 + 1);
+		//from 40 to 47
+		String fourthPart = "";
+		int forFourthPart = 40 + rn.nextInt(47 - 40 + 1);
+		
+		while(true)
+		{
+			/*
+			 * If they're the same, then we can't see the text!
+			 */
+			if((forThirdPart + 10) != forFourthPart)
+			{
+				break;
+			}
+			else
+			{
+				forThirdPart = 30 + rn.nextInt(37 - 30 + 1);
+				forFourthPart = 40 + rn.nextInt(47 - 40 + 1);
+			}
+		}
+		
 		thirdPart = thirdPart.concat(Integer.toString(forThirdPart));
 		thirdPart = thirdPart.concat(";");
 		resultingColor = resultingColor.concat(thirdPart);
-
-		//40 to 47
-		String fourthPart = "";
-		int forFourthPart = 40 + rn.nextInt(47 - 40 + 1);
+		
 		fourthPart = fourthPart.concat(Integer.toString(forFourthPart));
 		fourthPart = fourthPart.concat("m");
 		resultingColor = resultingColor.concat(fourthPart);
-
+		
+		for(int i = 0; i < Server.users.size(); i++)
+		{
+			if(Server.users.get(i).getColor().equals(resultingColor))
+			{
+				randomColorSetter();
+			}
+		}
 		user.setColor(resultingColor);
-
+		}
 	}
 	
 	private void addUser(BufferedReader fromClient) throws IOException
@@ -431,6 +402,7 @@ public class SessionThread extends Thread {
 							if(count == 10)
 							{
 								toClient.println("Could not initiate private chat with user. Please try again later.");
+								return;
 							}
 							else if(count == 9)
 							{
@@ -456,6 +428,7 @@ public class SessionThread extends Thread {
 					}
 					i++;
 				}
+				toClient.println(command.substring(8) + " does not exist in this chat session.");
 			}
 		}catch(Exception e)
 		{
@@ -514,6 +487,7 @@ public class SessionThread extends Thread {
 								else if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderIndex() == this.userIndex)
 								{
 									pcs--;
+									if(pcs == 0) inPrivateSession = false;
 									Server.sessions.get(i).getUser().pc = false;
 									toClient.println("You have terminated your private chat session with: " + otherUser);
 									Server.sessions.get(i).write(user + " has terminated their private session with you.");
@@ -522,12 +496,42 @@ public class SessionThread extends Thread {
 							}
 							i++;
 						}
+						toClient.println(command.substring(4) + " does not exist in this chat session.");
 					}
 				}
 			}
 		}catch(Exception e)
 		{
 			
+		}
+	}
+	
+	private void listUsers()
+	{
+		synchronized(this)
+		{
+			String result = "List of Active Users: ";
+			boolean first = true;
+
+			for(int i = 0; i < Server.users.size(); i++)
+			{
+				if(!Server.users.get(i).getName().equals(""))
+				{
+					if(first == true)
+					{
+						result = result.concat(Server.users.get(i).toString());
+						first = false;
+					}
+					else
+					{
+						result = result.concat(", " + Server.users.get(i).toString());
+					}
+				}
+			}
+			
+			result = result.concat(".");
+			buffer = new StringBuffer(result);
+			toClient.println(buffer.toString());
 		}
 	}
 	

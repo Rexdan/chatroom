@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class User extends ArrayList<User>
 {
 	private String name;
-	private String color;
+	private String color = "";
 	private String endingColor = "\033[0m";
 	private boolean exiting = false;
 	public boolean pc = false;
@@ -59,17 +59,13 @@ public class User extends ArrayList<User>
 	{
 		User user = new User();
 
-		//System.out.println("In equals method.");
-
 		if(o == null)
 		{
-			//System.out.println("Object is null.");
 			return false;
 		}
 
 		else if(o instanceof User)
 		{
-			//System.out.println("Object is an instance of User.");
 			user = (User) o;
 		}
 

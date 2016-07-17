@@ -9,8 +9,6 @@ public class Server implements java.io.Serializable
 	public static ArrayList<SessionThread> sessions = new ArrayList<SessionThread>();
 	public static ArrayList<User> users;
 	private static File saveFile;
-	
-	//May have to subtract one from this variable to display messages correctly
 	private final static int MAX = 20;
 
 	public static void main( String [] arg ) throws Exception
@@ -41,8 +39,8 @@ public class Server implements java.io.Serializable
 				sessions.get(index).start();
 			}
 		}
-		//After Server shuts down, we want to delete all of the users.
 		
+		//After Server shuts down, we want to delete all of the users.
 		resetAllUsers();
 		
 		serverSocket.close();

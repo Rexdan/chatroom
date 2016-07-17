@@ -1,4 +1,4 @@
-import	java.util.*;
+//import	java.util.*;
 import	java.io.*;
 import	java.net.*;
 
@@ -7,15 +7,6 @@ public class Client implements Runnable{
 	public static int port;
 
 	public Socket socket;
-
-	private static String UserName;
-	
-	public ArrayList<Socket> sockets = new ArrayList<Socket>();
-
-	public static String getUserName()
-	{
-		return UserName;
-	}
 
 	private static Socket connect( String host ) throws Exception
 	{
@@ -40,13 +31,11 @@ public class Client implements Runnable{
 	public static void main( String [] arg ) throws Exception
 	{
 		Socket		socket;
-		InetAddress ip;
 		String ipAddr = "";
 		
 		try
 	  	{
 			ipAddr = arg[0];
-	  		//ip = InetAddress.getByName(arg[0]);
 	  		if(ipAddr.isEmpty())
 	  		{
 	  			System.err.println("You must specify a host address.");
@@ -94,7 +83,7 @@ public class Client implements Runnable{
 	  			s = "ERROR. You must specify a username with the @name command.";
 				s = s.concat("\n");
 				s = s.concat("Please restart the client.");
-				System.out.println(s);
+				System.err.println(s);
 				System.exit(1);
 			}
 	  		else if(s.equalsIgnoreCase("@name"))
@@ -102,7 +91,7 @@ public class Client implements Runnable{
 	  			s = "ERROR. You cannot have an empty username.";
 				s = s.concat("\n");
 				s = s.concat("Please restart the client.");
-				System.out.println(s);
+				System.err.println(s);
 				System.exit(1);
 	  		}
 	  		else
@@ -122,14 +111,9 @@ public class Client implements Runnable{
 	  		
 	  	}
 	  	
-	  	String temp = "192.168.1.126";
-	  	temp = "";
-	  	
 		do {
 			socket = connect(ipAddr);
 		} while ( socket == null );
-
-		
 
 		//We need/want to get information from the Server.
 		fromServer = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
@@ -189,10 +173,8 @@ public class Client implements Runnable{
 		
 		if(fromSearch.length() > 0) System.out.println(fromSearch);
 		
-		new Thread(new Client()).start();		
-		
-		//For first run.
-	//	System.out.println(name + ": ");
+		new Thread(new Client()).start();
+			
 		while((s = stdIn.readLine()) != null && inSession)
 		{
 			toServer.println( s );	
@@ -202,7 +184,6 @@ public class Client implements Runnable{
 				break;
 			}
 		}
-		
 		socket.close();
 	}
 
@@ -217,8 +198,6 @@ public class Client implements Runnable{
 				{
 					System.out.println( result );
 				}
-				
-
 			} catch (IOException e)
 			{
 				if(inSession == false)
@@ -228,7 +207,7 @@ public class Client implements Runnable{
 				}
 				else
 				{
-					System.err.println("Houston, we have a problem.");
+					System.err.println("We have lost connection to the Server.");
 					System.exit(1);
 				}
 			}
