@@ -1,4 +1,5 @@
 import	java.util.*;
+import java.util.concurrent.TimeUnit;
 import	java.io.*;
 import	java.net.*;
 
@@ -415,6 +416,7 @@ public class SessionThread extends Thread {
 				
 				int count = 0;
 				int i = 0;
+				int tries = 10;
 				
 				while(i < Server.sessions.size())
 				{
@@ -422,10 +424,20 @@ public class SessionThread extends Thread {
 					{
 						//To have a reference to the FULL user object, not just name.
 						otherUser = Server.sessions.get(i).getUser();
-						if(Server.sessions.get(i).getUser().pc == true && count <= 10)
+						if(Server.sessions.get(i).getUser().pc == true)
 						{
-							int currentCount = count + 10 + count--;
-							toClient.println(otherUser + " is currently in a private chat session. " + "Retrying " + (currentCount) + " more times.");
+							//if(count == 11) return;
+							TimeUnit.SECONDS.sleep(1);
+							if(count == 10)
+							{
+								toClient.println("Could not initiate private chat with user. Please try again later.");
+							}
+							else if(count == 9)
+							{
+								toClient.println(otherUser + " is currently in a private chat session. " + "Retrying " + (tries - count) + " more time...");
+							}
+							else toClient.println(otherUser + " is currently in a private chat session. " + "Retrying " + (tries - count) + " more times...");
+							
 							count++;
 							continue;
 						}

@@ -32,7 +32,10 @@ public class Client implements Runnable{
 	static String s, result;
 	static BufferedReader stdIn, fromServer;
 	static PrintWriter	toServer;
+	static String name = "";
 	static boolean inSession = true;
+	static boolean typed = false;
+	static boolean receiving;
 	
 	public static void main( String [] arg ) throws Exception
 	{
@@ -83,7 +86,6 @@ public class Client implements Runnable{
 
 	  	stdIn = new BufferedReader( new InputStreamReader( System.in ) );
 	  	s = stdIn.readLine();
-	  	String name = "";
 	  	
 	  	try
 	  	{
@@ -134,12 +136,6 @@ public class Client implements Runnable{
 
 		//This is a give/take relationship.
 		toServer = new PrintWriter( new OutputStreamWriter( socket.getOutputStream() ), true );
-
-		//Want a reference to the username for use in session thread!
-		//toServer.println(name);
-
-		//s = stdIn.readLine();
-		//System.out.println("This is the input: " + s);
 		
 		try
 		{
@@ -193,15 +189,13 @@ public class Client implements Runnable{
 		
 		if(fromSearch.length() > 0) System.out.println(fromSearch);
 		
-		new Thread(new Client()).start();
+		new Thread(new Client()).start();		
 		
 		//For first run.
-		System.out.print(name + ": ");
-		
+	//	System.out.println(name + ": ");
 		while((s = stdIn.readLine()) != null && inSession)
 		{
-			System.out.print(name + ": ");
-			toServer.println( s );
+			toServer.println( s );	
 			if(s.equals("@exit"))
 			{
 				inSession = false;
@@ -220,9 +214,11 @@ public class Client implements Runnable{
 			try
 			{
 				while((result = fromServer.readLine()) != null)
-				{	
+				{
 					System.out.println( result );
 				}
+				
+
 			} catch (IOException e)
 			{
 				if(inSession == false)

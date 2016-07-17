@@ -62,6 +62,7 @@ public class Server implements java.io.Serializable
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void loadHistory(){
 
 	  	try {
@@ -72,7 +73,7 @@ public class Server implements java.io.Serializable
 				 	FileInputStream fis = new FileInputStream("history.txt");
 				    //ObjectInputStream ois = new ObjectInputStream(fis);
 				    messages = new ArrayList<String>();
-				    //fis.close();
+				    fis.close();
 			}
 			else if (line != null){
 				FileInputStream fis = new FileInputStream("history.txt");
@@ -80,6 +81,7 @@ public class Server implements java.io.Serializable
 			    messages = (ArrayList<String>)ois.readObject();
 			    ois.close();
 			}
+			br.close();
 		} catch(Exception e) {
 		    e.printStackTrace();
 		}
