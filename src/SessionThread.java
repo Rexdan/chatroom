@@ -510,27 +510,47 @@ public class SessionThread extends Thread {
 	{
 		synchronized(this)
 		{
-			String result = "List of Active Users: ";
+			String active = "List of Active Users: ";
+			String targeted = "List of Active Users who are being targeted for private messages";
 			boolean first = true;
+			boolean hadPriv = false;
 
 			for(int i = 0; i < Server.users.size(); i++)
 			{
 				if(!Server.users.get(i).getName().equals(""))
 				{
-					if(first == true)
+					if(first && Server.users.get(i).pc == false)
 					{
-						result = result.concat(Server.users.get(i).toString());
+						active = active.concat(Server.users.get(i).toString());
 						first = false;
+					}
+					else if(Server.users.get(i).pc)
+					{
+						if(first)
+						{
+							targeted = targeted.concat(Server.users.get(i).toString());
+							first = false;
+						}
+						else
+						{
+							targeted = targeted.concat(", " + Server.users.get(i).toString());
+						}
+						hadPriv = true;
 					}
 					else
 					{
-						result = result.concat(", " + Server.users.get(i).toString());
+						active = active.concat(", " + Server.users.get(i).toString());
 					}
 				}
 			}
-			
-			result = result.concat(".");
-			buffer = new StringBuffer(result);
+			if(hadPriv)
+			{
+				targeted = targeted.concat(".");
+				buffer = new StringBuffer(targeted);
+				toClient.println(buffer.toString());
+			}
+			active = active.concat(".");
+			buffer = new StringBuffer(active);
 			toClient.println(buffer.toString());
 		}
 	}
