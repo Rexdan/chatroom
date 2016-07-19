@@ -20,8 +20,10 @@ public class Server implements java.io.Serializable
 		Socket		socket;
 		serverSocket.setReuseAddress( true );
 		
+		System.out.println("Listening for clients...");
+		
 		while ( (socket = serverSocket.accept()) != null )
-		{		
+		{	
 			if(sessions.size() == MAX)
 			{
 				System.out.println( "Server is full. No longer accepting other connections." );
@@ -32,16 +34,18 @@ public class Server implements java.io.Serializable
 			}
 			else
 			{
-				System.out.println( "Accepted an incoming connection" );
+				System.out.println( "Accepted an incoming connection." );
 				SessionThread sesh = new SessionThread( socket );
 				sessions.add(sesh);
 				int index = sessions.lastIndexOf(sesh);
 				sessions.get(index).start();
+				if(!sessions.get(index).joined)System.out.println( "Username already taken. Connection with client terminated." );
+				sessions.get(index).sessionIndex = index;
 			}
 		}
 		
 		//After Server shuts down, we want to delete all of the users.
-		resetAllUsers();
+		//resetAllUsers();
 		
 		serverSocket.close();
 	}

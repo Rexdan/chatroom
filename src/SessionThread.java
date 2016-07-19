@@ -22,9 +22,10 @@ public class SessionThread extends Thread {
 	boolean joined = false;
 	boolean firstRun = true;
 	boolean badRun = false;
-	boolean inPrivateSession = false;
+	boolean inPrivateSession;
 	boolean weird = false;
 	int userIndex = 0;
+	int sessionIndex;
 	int pcs = 0;
 
 	public SessionThread( Socket s )
@@ -54,8 +55,6 @@ public class SessionThread extends Thread {
 			if(joined)
 			{
 				toClient.println(s);
-				//This is so we can append the start of each of the user's messages with their name on their end.
-				toClient.println(user);
 			}
 			else
 			{
@@ -76,8 +75,6 @@ public class SessionThread extends Thread {
 			
 			while ( (s = fromClient.readLine()) != null )
 			{	
-				//s = fromClient.readLine();
-
 				if(s == null)
 				{
 					socket.close();
@@ -93,6 +90,8 @@ public class SessionThread extends Thread {
 
 				char c = command.charAt(0);
 				command = command.substring(1);
+				
+				if(pcs == 0) inPrivateSession = false;
 
 				if(c == '@')
 				{	
@@ -151,9 +150,7 @@ public class SessionThread extends Thread {
 		}
 		catch ( Exception e )
 		{
-			if(closed) return;
-			System.out.println( "The client has terminated prematurely..." + e.toString() );
-			e.printStackTrace();
+			System.err.println( "The client has terminated prematurely..." + e.toString() );
 		}
 	}
 	
@@ -162,9 +159,10 @@ public class SessionThread extends Thread {
 		toClient.println(input);
 	}
 	
-	public void receiverExited(int userIndex)
+	public void receiverExited(int sessionIndex)
 	{
-		String msg = Server.users.get(userIndex) + " has exited the chat session.";
+		String msg = Server.sessions.get(sessionIndex).getUser() + " has exited the chat session.";
+		Server.sessions.get(sessionIndex).getUser().pc = false;
 		toClient.println(msg);
 		pcs--;
 	}
@@ -178,24 +176,20 @@ public class SessionThread extends Thread {
 				message = user + " has exited the chat session.";
 				Server.saveMessage(message);
 				Server.saveHistory();
-				Server.users.set(userIndex, new User());
+				
 				if(this.user.pc)
 				{
-					for(int i = 0; i < Server.sessions.size(); i++)
-					{
-						if(Server.sessions.get(i).userIndex == (this.user.getSenderIndex()))
-						{
-							Server.sessions.get(i).receiverExited(this.userIndex);
-						}
-					}
+					Server.sessions.get(this.user.getSenderSessionIndex()).receiverExited(this.sessionIndex);
 				}
+				Server.users.set(userIndex, new User());
+				Server.sessions.set(this.sessionIndex, null);
 			}
 			
 			if(inPrivateSession)
 			{
 				for(int i = 0; i < Server.sessions.size(); i++)
 				{
-					if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null && Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderIndex() == (this.userIndex))
+					if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser() != null && Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderSessionIndex() == (this.sessionIndex))
 					{
 						Server.sessions.get(i).write(message);
 					}
@@ -381,7 +375,7 @@ public class SessionThread extends Thread {
 				
 				if(otherUser.equals(this.user))
 				{
-					toClient.println("Why would you want to private chat with yourself?" + "\n" + "Going back to Public Chat...");
+					toClient.println("Why would you want to private chat with yourself?");
 					return;
 				}
 				
@@ -391,7 +385,7 @@ public class SessionThread extends Thread {
 				
 				while(i < Server.sessions.size())
 				{
-					if(Server.sessions.get(i).getUser().equals(otherUser))
+					if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser().equals(otherUser))
 					{
 						//To have a reference to the FULL user object, not just name.
 						otherUser = Server.sessions.get(i).getUser();
@@ -418,9 +412,10 @@ public class SessionThread extends Thread {
 							//Directly setting their status in arraylist.
 							Server.sessions.get(i).getUser().pc = true;
 							//We want a reference to the user/session that THIS user is allowed to send messages to.
-							Server.sessions.get(i).getUser().setSenderIndex(this.userIndex);
+							Server.sessions.get(i).getUser().setSenderSessionIndex(this.sessionIndex);
 							toClient.println("You are now in a PRIVATE chat session with: " + otherUser);
 							Server.sessions.get(i).write(getUser() + " has started to private chat with you.");
+							Server.sessions.get(i).write("If you wish to send a message back to the user, please type '@private " + getUser() + "' and hit enter." + "\n" + "It will initiate a PRIVATE chat session with the sender.");
 							inPrivateSession = true;
 							pcs++;
 							return;
@@ -459,7 +454,7 @@ public class SessionThread extends Thread {
 				
 				if(otherUser.equals(this.user))
 				{
-					toClient.println("Why would you want to terminate the private chat with yourself?" + "\n" + "Going back to Public Chat...");
+					toClient.println("Why would you want to terminate the private chat with yourself?");
 					return;
 				}
 				else
@@ -470,11 +465,11 @@ public class SessionThread extends Thread {
 					{
 						while(i < Server.sessions.size())
 						{
-							if(Server.sessions.get(i).getUser().equals(otherUser))
+							if(Server.sessions.get(i) != null && Server.sessions.get(i).getUser().equals(otherUser))
 							{
 								//To have a reference to the FULL user object, not just name.
 								otherUser = Server.sessions.get(i).getUser();
-								if(Server.sessions.get(i).getUser().getSenderIndex() != this.userIndex)
+								if(Server.sessions.get(i).getUser().getSenderSessionIndex() != this.sessionIndex)
 								{
 									toClient.println("You are not in a private chat session with " + otherUser);
 									return;
@@ -484,7 +479,7 @@ public class SessionThread extends Thread {
 									toClient.println("You cannot terminate the private chat session with " + otherUser + " because that user is not currently set to receive any private messages...");
 									return;
 								}
-								else if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderIndex() == this.userIndex)
+								else if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderSessionIndex() == this.sessionIndex)
 								{
 									pcs--;
 									if(pcs == 0) inPrivateSession = false;
@@ -502,7 +497,7 @@ public class SessionThread extends Thread {
 			}
 		}catch(Exception e)
 		{
-			
+			System.err.println("Lost connection to the Client...");
 		}
 	}
 	
@@ -553,6 +548,11 @@ public class SessionThread extends Thread {
 			buffer = new StringBuffer(active);
 			toClient.println(buffer.toString());
 		}
+	}
+	
+	public int getSessionIndex()
+	{
+		return this.sessionIndex;
 	}
 	
 	public Socket getSocket()

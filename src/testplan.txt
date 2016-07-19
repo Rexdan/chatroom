@@ -1,0 +1,195 @@
+@name 1
+You have joined the chat session.
+................START OF CHAT HISTORY................
+[4;33;41mDre[0m: Hey there.
+[4;33;41mDre[0m: Sup?
+[4;33;41mDre[0m has exited the chat session.
+[4;33;41mDre[0m has exited the chat session.
+[7;36;47mbro[0m: sup
+[7;36;47mbro[0m: you
+[7;36;47mbro[0m: huh...
+[7;36;47mbro[0m has exited the chat session.
+[7;36;47mbro[0m has exited the chat session.
+[3;35;46mDre[0m: hey
+[3;35;46mDre[0m: sup
+[3;35;46mDre[0m: meh
+[3;35;46mDre[0m has exited the chat session.
+[3;35;46mDre[0m has exited the chat session.
+[3;35;41mBro[0m: hey
+[3;35;41mBro[0m: sup
+[3;35;41mBro[0m: idk
+[3;35;41mBro[0m: woo
+[3;35;41mBro[0m has exited the chat session.
+[3;35;41mBro[0m has exited the chat session.
+[0;32;41mDre[0m: hey
+[0;32;41mDre[0m: hi
+[0;32;41mDre[0m: blah
+[4;37;44mBro[0m: Sup
+[4;37;44mBro[0m: yo yo
+[0;32;41mDre[0m: hey
+[0;32;41mDre[0m has exited the chat session.
+[0;32;41mDre[0m has exited the chat session.
+[4;37;44mBro[0m has exited the chat session.
+[4;37;44mBro[0m has exited the chat session.
+[4;31;43mDre[0m: hey
+[4;31;43mDre[0m: sup
+[4;31;43mDre[0m: idk
+[4;31;43mDre[0m has exited the chat session.
+[4;31;43mDre[0m has exited the chat session.
+[8;32;40mDre[0m: Hey
+[8;32;40mDre[0m: Sup
+[8;32;40mDre[0m: Hey
+[1;30;47m1[0m: hey
+[2;37;45m3[0m: boooo
+[8;30;47m2[0m: Yay
+[1;30;47m1[0m: sup
+[2;37;45m3[0m: sup
+[1;30;47m1[0m: hey
+[2;37;45m3[0m: idk
+[1;30;47m1[0m: weird
+[2;37;45m3[0m: yup
+[8;30;47m2[0m: cool
+[8;30;47m2[0m: hi
+[8;30;47m2[0m: yo
+[1;30;47m1[0m: werid
+[1;30;47m1[0m: hey
+[1;30;47m1[0m: so
+[8;30;47m2[0m: hi
+[1;30;47m1[0m has exited the chat session.
+[1;30;47m1[0m has exited the chat session.
+[8;30;47m2[0m has exited the chat session.
+[8;30;47m2[0m has exited the chat session.
+[2;37;45m3[0m has exited the chat session.
+[2;37;45m3[0m has exited the chat session.
+[3;36;47m2[0m: hey
+[7;31;45m1[0m: odd
+[3;36;47m2[0m: yup
+[3;36;47m2[0m: hi
+[7;36;43m3[0m: hi
+[3;30;42m2[0m: fdsf
+[3;30;42m2[0m: sfsdfd
+[3;30;42m2[0m: sfdfd
+[7;36;43m3[0m: sdfsdf
+[3;36;40m1[0m: hi
+[3;30;42m2[0m: dfs
+[3;36;40m1[0m has exited the chat session.
+[3;36;40m1[0m has exited the chat session.
+[3;30;42m2[0m has exited the chat session.
+[3;30;42m2[0m has exited the chat session.
+[7;36;43m3[0m has exited the chat session.
+[7;36;43m3[0m has exited the chat session.
+[8;30;46m2[0m: heya
+[8;30;46m2[0m: 456
+[8;30;46m2[0m: 456
+[8;30;46m2[0m has exited the chat session.
+[8;30;46m2[0m has exited the chat session.
+[7;34;45m1[0m has exited the chat session.
+[7;34;45m1[0m has exited the chat session.
+[7;32;45m3[0m has exited the chat session.
+[7;32;45m3[0m has exited the chat session.
+[7;35;43m1[0m: hey
+[8;30;45m2[0m: blah
+[7;35;43m1[0m: hey
+[7;35;43m1[0m: yo
+[7;35;43m1[0m: sdf
+[8;30;45m2[0m: ugh
+[7;35;43m1[0m: sdf
+[8;30;45m2[0m: blahhh
+[7;35;43m1[0m: sfsdfsd
+[8;30;45m2[0m has exited the chat session.
+[8;30;45m2[0m has exited the chat session.
+[7;35;43m1[0m has exited the chat session.
+[7;35;43m1[0m has exited the chat session.
+[8;32;46m2[0m: hey
+[0;34;46m1[0m: hey
+[0;34;46m1[0m: sdf
+[8;32;46m2[0m: hfhfhf
+[0;34;46m1[0m has exited the chat session.
+[0;34;46m1[0m has exited the chat session.
+[8;32;46m2[0m has exited the chat session.
+[8;32;46m2[0m has exited the chat session.
+[1;32;46m1[0m: hey
+[1;32;46m1[0m: cool
+[1;32;46m1[0m: sdf
+[7;30;47m2[0m: YES
+[1;32;46m1[0m: SUCCESS
+[7;30;47m2[0m has exited the chat session.
+[7;30;47m2[0m has exited the chat session.
+[1;32;46m1[0m has exited the chat session.
+[1;32;46m1[0m has exited the chat session.
+[8;35;47m2[0m: woo
+[8;35;47m2[0m: yeahhh
+[8;31;42mDre[0m: hey hey
+[8;32;41m3[0m: yooo
+[8;32;41m3[0m: SUP?!
+[8;35;47m2[0m: WASSUPPP
+[8;35;43m5[0m: sdfsdfsdfd
+[8;35;43m5[0m: sfgsdgdfghdgdfsgdfsgdfg
+[8;32;41m3[0m: jskhfkljshfjskdlhfkjsdhfkjsldhfskjhfsjdkhfkasj
+[8;32;41m3[0m: jklsdhfksdhfjklsdhfkjlsdhfjksdhfjklsdhfjksdhjkf
+[8;32;41m3[0m: fhfhfhfhfhfhfhf
+[8;32;41m3[0m: fhhffhfhfhfhfhfhf
+[8;32;41m3[0m has exited the chat session.
+[8;32;41m3[0m has exited the chat session.
+[8;35;43m5[0m has exited the chat session.
+[8;35;43m5[0m has exited the chat session.
+[8;35;47m2[0m has exited the chat session.
+[8;35;47m2[0m has exited the chat session.
+[4;30;46m4[0m has exited the chat session.
+[4;30;46m4[0m has exited the chat session.
+[8;31;42mDre[0m has exited the chat session.
+[8;31;42mDre[0m has exited the chat session.
+[0;30;47m1[0m: hey there
+[8;36;44m2[0m: hey
+[8;33;41m3[0m: hi
+[8;36;44m2[0m: sfsfsd
+[0;30;47m1[0m: sdsdfsd
+[8;36;44m2[0m: sdfsedf
+[0;30;47m1[0m: sdfsdf
+[8;33;41m3[0m: woo
+[8;33;41m3[0m has exited the chat session.
+[8;33;41m3[0m has exited the chat session.
+[8;36;44m2[0m has exited the chat session.
+[8;36;44m2[0m has exited the chat session.
+[0;30;47m1[0m has exited the chat session.
+[0;30;47m1[0m has exited the chat session.
+[7;34;41m1[0m: hey
+[7;34;41m1[0m has exited the chat session.
+[7;34;41m1[0m has exited the chat session.
+[3;31;44m1[0m: hey
+[3;31;44m1[0m: Woo
+[3;31;44m1[0m: Yay.
+[3;31;44m1[0m: It works Professor Russel. This was a very...interesting assignment.
+[3;31;44m1[0m has exited the chat session.
+[3;31;44m1[0m has exited the chat session.
+[7;33;45m1[0m: Hey there
+[7;37;46m3[0m: Hi
+[4;32;46m2[0m: hey
+[7;33;45m1[0m: yay
+[7;33;45m1[0m has exited the chat session.
+[7;33;45m1[0m has exited the chat session.
+[4;32;46m2[0m has exited the chat session.
+[4;32;46m2[0m has exited the chat session.
+[7;37;46m3[0m has exited the chat session.
+[7;37;46m3[0m has exited the chat session.
+................END OF CHAT HISTORY................
+@private 2
+You are now in a PRIVATE chat session with: [2;34;43m2[0m
+@private 3
+You are now in a PRIVATE chat session with: [2;30;46m3[0m
+hey
+@who
+List of Active Users who are being targeted for private messages, [2;34;43m2[0m, [2;30;46m3[0m.
+List of Active Users: [3;36;40m1[0m.
+@end 2
+You have terminated your private chat session with: [2;34;43m2[0m
+@who
+List of Active Users who are being targeted for private messages, [2;30;46m3[0m.
+List of Active Users: [3;36;40m1[0m, [2;34;43m2[0m.
+hehehe
+@end 3
+You have terminated your private chat session with: [2;30;46m3[0m
+[2;34;43m2[0m: woo
+[2;30;46m3[0m: sfsdf
+@exit
+You have exited the chat session.

@@ -1,4 +1,4 @@
-//import	java.util.*;
+import java.util.concurrent.TimeUnit;
 import	java.io.*;
 import	java.net.*;
 
@@ -25,14 +25,13 @@ public class Client implements Runnable{
 	static PrintWriter	toServer;
 	static String name = "";
 	static boolean inSession = true;
-	static boolean typed = false;
-	static boolean receiving;
 	
 	public static void main( String [] arg ) throws Exception
 	{
 		Socket		socket;
 		String ipAddr = "";
-		
+		System.out.println("Please specify a username with the @name command.");
+		System.out.println("Type -h for a list of commands.");
 		try
 	  	{
 			ipAddr = arg[0];
@@ -74,44 +73,71 @@ public class Client implements Runnable{
 		}
 
 	  	stdIn = new BufferedReader( new InputStreamReader( System.in ) );
-	  	s = stdIn.readLine();
-	  	
-	  	try
-	  	{
-	  		if(s.length() < 6)
+		
+		while((s = stdIn.readLine()) != null)
+		{
+			try
 			{
-	  			s = "ERROR. You must specify a username with the @name command.";
-				s = s.concat("\n");
-				s = s.concat("Please restart the client.");
-				System.err.println(s);
-				System.exit(1);
+				if(s.charAt(0) == '@')
+				{
+					if(s.length() < 6)
+					{
+						s = "ERROR. You must first specify a username with the @name command.";
+						System.err.println(s);
+						continue;
+					}
+					else if(s.equalsIgnoreCase("@name") || s.substring(6).length() == 0)
+					{
+						s = "ERROR. You cannot have an empty username.";
+						System.err.println(s);
+						continue;
+					}
+					else if(s.substring(6).length() > 100)
+					{
+						s = "ERROR. The username that you entered exceeds 100 characters.";
+						System.err.println(s);
+						continue;
+					}
+					else
+					{
+						name = s.substring(6);
+						break;
+					}
+				}
+				else if(s.equals("-h"))
+				{
+					help();
+					continue;
+				}
+				else if(s.charAt(0) != '@' || !s.equals("-h"))
+				{
+					s = "ERROR. You entered neither a username after '@name' or '-h' for help.";
+					System.err.println(s);
+					continue;
+				}
+			}catch(Exception e)
+			{
+				
 			}
-	  		else if(s.equalsIgnoreCase("@name"))
-	  		{
-	  			s = "ERROR. You cannot have an empty username.";
-				s = s.concat("\n");
-				s = s.concat("Please restart the client.");
-				System.err.println(s);
-				System.exit(1);
-	  		}
-	  		else
-	  		{
-	  			name = s.substring(6);
-	  			if(name.length() > 100)
-	  			{
-	  				s = "The username that you entered exceeds 100 characters.";
-					s = s.concat("\n");
-					s = s.concat("Please restart the client with a shorter username.");
-					System.out.println(s);
-					System.exit(1);
-	  			}
-	  		}
-	  	}catch(Exception e)
-	  	{
-	  		
-	  	}
-	  	
+		}
+		
+	  	int count = 0;
+		int tries = 10;
 		do {
+			System.out.println("Waiting to connect to server...");
+			if(count == 10)
+			{
+				System.out.println("Client Timed Out.");
+				System.exit(0);
+			}
+			else if(count == 9)
+			{
+				System.out.println("Retrying connection " + (tries - count) + " more time...");
+			}
+			else System.out.println("Retrying connection " + (tries - count) + " more times...");
+			
+			TimeUnit.SECONDS.sleep(1);
+			count++;
 			socket = connect(ipAddr);
 		} while ( socket == null );
 
@@ -125,7 +151,6 @@ public class Client implements Runnable{
 		{
 			toServer.println(s);
 			result = fromServer.readLine();
-			name = fromServer.readLine();
 			
 			String nameExists = "User already exists in chat. Please restart client with different username.";
 
@@ -152,7 +177,7 @@ public class Client implements Runnable{
 	
 		//To have the name appended at the beginning of each new message by user.
 		String search = "";
-		int count = 0;
+		count = 0;
 		search = fromServer.readLine();
 		count = Integer.parseInt(search);
 		String fromSearch = "";
@@ -185,6 +210,18 @@ public class Client implements Runnable{
 			}
 		}
 		socket.close();
+	}
+	
+	private static void help()
+	{
+			System.out.println("   @name: To tell the Server what username you wish to use. Can only be used once during your session.");
+			System.out.println("          The username cannot exceed 100 Characters.");
+			System.out.println("    @who: Will output a list of Active Users as well as a list of Active Users who are receiving private messages.");
+			System.out.println("@private: This will initiate a private conversation with another Active User assuming that they are not receiving private messages from another user.");
+			System.out.println("          Must specify the user after '@private' is typed on the same line.");
+			System.out.println("    @end: This will terminate a private conversation with the Active User who you initially started a private conversation with.");
+			System.out.println("          Must specify the user after '@end' is typed on the same line.");
+			System.out.println("   @exit: This will terminate your session with the chatroom.");
 	}
 
 	@Override

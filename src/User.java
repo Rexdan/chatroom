@@ -7,21 +7,21 @@ public class User extends ArrayList<User>
 	private String endingColor = "\033[0m";
 	private boolean exiting = false;
 	public boolean pc = false;
-	private int senderIndex;
+	private int senderSessionIndex;
 
 	public void setExiting(boolean exiting)
 	{
 		this.exiting = exiting;
 	}
 	
-	public void setSenderIndex(int senderIndex)
+	public void setSenderSessionIndex(int senderSessionIndex)
 	{
-		this.senderIndex = senderIndex;
+		this.senderSessionIndex = senderSessionIndex;
 	}
 	
-	public int getSenderIndex()
+	public int getSenderSessionIndex()
 	{
-		return this.senderIndex;
+		return this.senderSessionIndex;
 	}
 
 	public boolean isExiting()
