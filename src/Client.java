@@ -202,6 +202,11 @@ public class Client implements Runnable{
 			
 		while((s = stdIn.readLine()) != null && inSession)
 		{
+			if(s.equals("-h"))
+			{
+				help();
+				continue;
+			}
 			toServer.println( s );	
 			if(s.equals("@exit"))
 			{
