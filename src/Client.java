@@ -231,21 +231,23 @@ public class Client implements Runnable{
 		{
 			try
 			{
-				while((result = fromServer.readLine()) != null)
+				while(true)
 				{
-					System.out.println( result );
+					result = fromServer.readLine();
+					if(result != null) System.out.println( result );
+					else
+					{
+						System.err.println("We have lost connection to the Server.");
+						System.exit(1);
+					}
 				}
+
 			} catch (IOException e)
 			{
 				if(inSession == false)
 				{
 					System.out.println("You have exited the chat session.");
 					System.exit(0);
-				}
-				else
-				{
-					System.err.println("We have lost connection to the Server.");
-					System.exit(1);
 				}
 			}
 		}

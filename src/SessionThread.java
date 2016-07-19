@@ -150,6 +150,7 @@ public class SessionThread extends Thread {
 		}
 		catch ( Exception e )
 		{
+			closed = true;
 			System.err.println( "The client has terminated prematurely..." + e.toString() );
 		}
 	}
