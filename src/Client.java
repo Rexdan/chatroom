@@ -12,7 +12,7 @@ public class Client implements Runnable{
 	{
 		try
 		{
-			return new Socket( host, 8564 );
+			return new Socket( host, port );
 		}
 		catch ( ConnectException ce )
 		{
