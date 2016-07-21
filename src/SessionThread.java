@@ -182,6 +182,16 @@ public class SessionThread extends Thread {
 				{
 					Server.sessions.get(this.user.getSenderSessionIndex()).receiverExited(this.sessionIndex);
 				}
+				
+				for(int i = 0; i < Server.sessions.size(); i++)
+				{
+					if(Server.sessions.get(i).getUser().pc == true && Server.sessions.get(i).getUser().getSenderSessionIndex() == this.sessionIndex)
+					{
+						Server.sessions.get(i).getUser().pc = false;
+					}
+					Server.sessions.get(i).write(message);
+				}
+				
 				Server.users.set(userIndex, new User());
 				Server.sessions.set(this.sessionIndex, null);
 			}
